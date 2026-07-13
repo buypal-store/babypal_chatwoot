@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escaleras – Catálogo</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-title">BabyPal</div>
+      <div class="brand-sub">Catálogo de Bebes</div>
+    </div>
+    <div class="top-actions">
+      <button id="btnVerPedido" class="btn ghost ver-pedido-btn" title="Ver resumen del pedido">
+        🧾 Ver Pedido <span id="contadorCarrito" class="contador-mini" style="display:none;">0</span>
+      </button>
+      <button id="btnClear" class="btn danger">Vaciar carrito</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- CATÁLOGO -->
+    <section class="catalog">
+      <div class="catalog-toolbar">
+        <div class="search">
+          <input id="searchInput" type="text" placeholder="Buscar escalera..." autocomplete="off" />
+        </div>
+      </div>
+      <div id="productGrid" class="grid"></div>
+    </section>
+
+    <!-- MODAL RESUMEN (antes de enviar) -->
+    <div id="summaryModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-card summary-card">
+    <button id="summaryClose" class="modal-close">✕</button>
+    <div class="summary-body">
+      <div class="summary-title">Resumen del pedido</div>
+      <div id="summaryLines" class="summary-lines"></div>
+      <!-- Bloque estático ELIMINADO para evitar duplicado con lo que genera app.js -->
+    </div>
+    <div style="margin-top:16px;">
+      <button id="btnIrPedidoFinal" class="btn big" style="width:100%; background:#22c55e; color:#000; font-weight:900;">
+        📋 Continuar con el pedido
+      </button>
+    </div>
+  </div>
+</div>
+
+    <!-- MODAL PEDIDO FINAL (todos los campos) -->
+    <div id="pedidoModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card summary-card" style="max-width:700px !important;">
+        <button id="pedidoClose" class="modal-close">✕</button>
+        <div class="summary-body">
+          <div class="summary-title">🧾 Resumen de Pedido</div>
+
+          <!-- Tabla SKU + Producto + Precio -->
+          <div style="overflow-x:auto; margin-bottom:12px;">
+            <table id="tablaPedido" style="width:100%; border-collapse:collapse; font-size:12px;">
+              <thead>
+                <tr style="border-bottom:2px solid rgba(255,255,255,.2);">
+                  <th style="padding:8px; text-align:left;">SKU</th>
+                  <th style="padding:8px; text-align:left;">Producto</th>
+                  <th style="padding:8px; text-align:right;">Precio</th>
+                </tr>
+              </thead>
+              <tbody id="tablaPedidoBody"></tbody>
+              <tfoot>
+                <tr style="border-top:2px solid rgba(255,255,255,.2); font-weight:900;">
+                  <td colspan="2" style="padding:8px; text-align:right;">TOTAL:</td>
+                  <td id="tablaPedidoTotal" style="padding:8px; text-align:right; color:#22c55e; font-size:16px;">S/ 0</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          
+
+          <!-- Campos del pedido (3 columnas) -->
+          <div id="camposPedido" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; font-size:11px;">
+            <!-- Columna 1 -->
+            <div>
+                <label>📅 Fecha</label>
+    <input id="campoFecha" type="date" class="campo-pedido" autocomplete="off">
+              <label>Agente</label><input id="campoAgente" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Rep</label>
+              <select id="campoReparto" class="campo-pedido" autocomplete="off">
+                <option value="">-</option>
+                <option value="Van">Van</option>
+                <option value="M">M</option>
+                <option value="Recojo en Tienda">Recojo en Tienda</option>
+                <option value="Soydelivery">Soydelivery</option>
+                <option value="Gustavo">Gustavo</option>
+              </select>
+              <label style="margin-top:6px;">T</label>
+              <select id="campoTurno" class="campo-pedido" autocomplete="off">
+                <option value="M">M</option>
+                <option value="T" selected>T</option>
+                <option value="N">N</option>
+              </select>
+              <label style="margin-top:6px;">Monto</label><input id="campoMonto" class="campo-pedido" readonly style="color:#22c55e; font-weight:900;" autocomplete="off">
+              <label style="margin-top:6px;">Forma de Pago</label>
+              <select id="campoFormaPago" class="campo-pedido" autocomplete="off">
+                <option value="">-</option>
+                <option value="Pagado">Pagado</option>
+                <option value="Yape">Yape</option>
+                <option value="Plin">Plin</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Efectivo">Efectivo</option>
+              </select>
+              <label style="margin-top:6px;">Pago</label><input id="campoPago" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Boleta o Factura</label>
+              <select id="campoBoleta" class="campo-pedido" autocomplete="off">
+                <option value="">-</option>
+                <option value="Boleta">Boleta</option>
+                <option value="Factura">Factura</option>
+              </select>
+              <label style="margin-top:6px;">Observación</label>
+              <input id="campoObservacion" class="campo-pedido" placeholder="-" autocomplete="off">
+              
+              <div id="campoComisionWrapper" style="display:none;">
+                <label style="margin-top:0;">Comisión</label>
+                <input id="campoComision" class="campo-pedido" placeholder="-" autocomplete="off" value="">
+              </div>
+            </div>
+            <!-- Columna 2 -->
+            <div>
+              <label>RUC</label><input id="campoRUC" class="campo-pedido" placeholder="-" autocomplete="off">
+              <label style="margin-top:6px;">Medio</label><input id="campoMedio" class="campo-pedido" value="BP" autocomplete="off">
+
+              <label style="margin-top:6px;">Plataforma</label>
+              <select id="campoPlataforma" class="campo-pedido">
+                <option value="">-</option>
+                <option value="MARIA - TKTOK">MARIA - TKTOK</option>
+                <option value="YAZID - TKTOK">YAZID - TKTOK</option>
+                <option value="GERARDO - TKTOK">GERARDO - TKTOK</option>
+              </select>
+              <label style="margin-top:6px;">Tipo</label><input id="campoTipo" class="campo-pedido" value="Menor" autocomplete="off">
+              <label style="margin-top:6px;">DNI</label><input id="campoDNI" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Cliente</label><input id="campoCliente" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Celular</label><input id="campoCelular" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Ubicación</label><input id="campoUbicacion" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Envío a cliente</label><input id="campoEnvioCliente" class="campo-pedido" placeholder="-" autocomplete="off">
+            </div>
+            <!-- Columna 3 -->
+            <div>
+              <label>Dirección</label><input id="campoDireccion" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Distrito</label><input id="campoDistrito" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Zona</label><input id="campoZona" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Cobro</label><input id="campoCobro" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Referencia</label><input id="campoReferencia" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Obs.3</label><input id="campoCorreo" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Estado</label>
+              <select id="campoEstado" class="campo-pedido" autocomplete="off">
+                <option value="Entregado" selected>Entregado</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Anulado">Anulado</option>
+              </select>
+              <label style="margin-top:6px;">Validación</label><input id="campoValidacion" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Adelanto</label><input id="campoAdelanto" class="campo-pedido" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- Botón enviar -->
+          <div style="margin-top:12px;">
+            <button id="btnEnviarPedido" class="btn big" style="width:100%; background:#22c55e; color:#000; font-weight:900;">
+              📤 Subir pedido a Drive
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
