@@ -52,7 +52,7 @@ window.productosData = [
   
   { sku: "COOLER-MAQUILLAJE", nombre: "Mini refrigeradora LED temperatura ajustable", precio: 119, imagen: "imagenes/led-temperatura-ajustable.jpg" },
   { sku: "ESTERILIZADOR-DQ-X03", nombre: "Esterilizador multifunción 4 en 1 tiempo ajustable", precio: 89, imagen: "imagenes/esterilizador-multifuncion-4-en-1-tiempo-ajustable.jpg" },
-  { sku: "PROCESADOR-ALIMENTOS-BEBE CON PANTALLA", nombre: "Procesador de Alimentos Pantalla Táctil 2 en 1", precio: 149, imagen: "" },
+  { sku: "PROCESADOR-ALIMENTOS-BEBE CON PANTALLA", nombre: "Procesador de Alimentos Pantalla Táctil 2 en 1", precio: 149, imagen: "imagenes/procesador-de-alimentos-pantalla-tactil-2-en-1.jpg" },
   { sku: "BABY-NUTRIBULLET", nombre: "Licuadora Baby Bullet para papillas 20 piezas", precio: 149, imagen: "imagenes/licuadora-baby-bullet-para-papillas-20-piezas.jpg" },
   { sku: "SILLA-COMER-BEBE-MARRON", nombre: "Silla de comer plegable bandeja extraíble marrón", precio: 89, imagen: "imagenes/silla-de-comer-plegable-y-bandeja-extraible.jpg" },
   { sku: "SILLA-COMER-BEBE-ROSADO", nombre: "Silla de comer plegable bandeja extraíble rosado", precio: 89, imagen: "imagenes/silla-de-comer-plegable-y-bandeja-extraible.jpg" },
@@ -112,7 +112,7 @@ window.productosData = [
  
  
  
- 
+ /*
  { sku: "ESTERILIZADOR-BIBERON", nombre: "Esterilizador multifunción 3 en 1", precio: 79, imagen: "imagenes/esterilizador-multifuncion-3-funciones-en-1.jpg" },
   { sku: "PROCESADOR-ALIMENTOS-BEBE-AZUL", nombre: "Procesador de alimentos táctil 2 en 1 azul", precio: 149, imagen: "imagenes/procesador-de-alimentos-pantalla-tactil-2-en-1.jpg" },
   { sku: "PROCESADOR-ALIMENTOS-BEBE-ROSA", nombre: "Procesador de alimentos táctil 2 en 1 rosa", precio: 149, imagen: "imagenes/procesador-de-alimentos-pantalla-tactil-2-en-1.jpg" },
@@ -148,5 +148,8 @@ window.productosData = [
   { sku: "MOCHILA-OSO-ROSA", nombre: "Mochila de ositos tiernos con corona rosa", precio: 20, imagen: "imagenes/mochila-de-ositos-tiernos-con-corona.jpg" },
   { sku: "MOCHILA-OSO-BLANCO", nombre: "Mochila de ositos tiernos con corona crema", precio: 20, imagen: "imagenes/mochila-de-ositos-tiernos-con-corona.jpg" },
   { sku: "MOCHILA-BEBE-MICKEY-AMARILLO", nombre: "Pañalera Mickey 11 compartimentos", precio: 39, imagen: "imagenes/panalera-mickey-con-11-compartimentos.jpg" },
+  
   { sku: "MOCHILA-BEBE-MINNIE-ROJO", nombre: "Pañalera Minnie 11 compartimentos", precio: 39, imagen: "imagenes/panalera-mickey-con-11-compartimentos.jpg" }
+
+  */
 ];
