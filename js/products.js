@@ -99,10 +99,10 @@ window.productosData = [
   { sku: "CORONA-BAÑERA-ROSA", nombre: "Gorro de baño corona rosa", precio: 15, imagen: "imagenes/gorro-de-bano-corona.jpg" },
   { sku: "CORONA-BAÑERA-CELESTE", nombre: "Gorro de baño corona celeste", precio: 15, imagen: "imagenes/gorro-de-bano-corona.jpg" },
 
-
-
-
-
+  { sku: "BOLSA-LECHE-30-UNID", nombre: "Bolsa de Leche 30 unidades", precio: 29, imagen: "regalos/BOLSAS DE LECHE.jpeg" },
+  { sku: "CONCHA-RECOLECTORA", nombre: "Conchas Recolectoras", precio: 29, imagen: "regalos/Conchas-recolectoras.png" },
+ { sku: "REGADERA-BEBE", nombre: "Gorro de baño corona celeste", precio: 19, imagen: "regalos/regadera_cojin_bebe.jpg" },
+ { sku: "PIGEON-SET-ALMACENADOR-LECHE", nombre: "3 Almacenadores de Leche", precio: 19, imagen: "regalos/Set de 3 Frascos Recolectores.jpeg" },
 
   
 
