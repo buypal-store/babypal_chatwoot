@@ -1,5 +1,10 @@
 window.productosData = [
   // --- EXTRACTORES DE LECHE ---
+ { sku: "EXTRACTOR-LECHE-MATERNA-S22", nombre: "Extractor eléctrico S22", precio: 149 , imagen: "imagenes/EXTRACTOR-LECHE-MATERNA-S22" },
+
+
+
+  
   { sku: "EXTRACTOR-S20", nombre: "Extractor eléctrico S20 pezón plano e invertido", precio: 129, imagen: "imagenes/extractor-electrica-s20-para-pezon-plano-e-invertido.jpg" },
   { sku: "EXTRACTOR-S22-NUEVO", nombre: "Extractor S22 3ra generación Para Mamás con mucha Producción", precio: 179, imagen: "imagenes/3ra-generacion-s22-para-mamas-con-mucha-produccion.jpg" },
   { sku: "EXTRACTOR-LECHE-MATERNA-S09", nombre: "Extractor S09 2da generación pezón sensible", precio: 139, imagen: "imagenes/2da-generacion-extractor-s09-para-pezon-sensible.jpg" },
@@ -18,6 +23,9 @@ window.productosData = [
   { sku: "PIGEON-BIBERON-240ML-PP", nombre: "Biberón Pigeon 240ml polipropileno", precio: 35, imagen: "imagenes/biberon-de-polipropileno-pigeon-libre-de-bpa-y-bps.jpg" },
   { sku: "PIGEON-BIBERON-330ML-PP", nombre: "Biberón Pigeon 330ml polipropileno", precio: 35, imagen: "imagenes/biberon-de-polipropileno-pigeon-libre-de-bpa-y-bps.jpg" },
   { sku: "PIGEON-BIBERON-240ML-V", nombre: "Biberón Pigeon 240ml de vidrio", precio: 79, imagen: "imagenes/biberon-pigeon-240ml-de-vidrio-libre-de-bpa-y-bps.jpg" },
+  { sku: "PIGEON-BIBERON-160ML-V", nombre: "Biberón Pigeon 160ml de vidrio", precio: 54, imagen: "imagenes/PIGEON-BIBERON-160ML-V" },
+
+  
   { sku: "PIGEON-SET-ALMACENADOR-LECHE", nombre: "3 tazas de almacenamiento 160ml convertible en biberón", precio: 50, imagen: "imagenes/3-tazas-de-almacenamiento-160ml-convertible-en-biberon.jpg" },
   { sku: "CHUPON-SUAVINEX", nombre: "Chupón Suavinex Zero Zero 0 a 6 meses", precio: 45, imagen: "imagenes/chupon-suavinex-zero-zero-para-bebes-de-0-a-6-meses.jpg" },
 
@@ -70,6 +78,12 @@ window.productosData = [
   { sku: "COMBO-BAÑERA-PLEGABLE-BEBE-GRIS", nombre: "Combo baño bañera plegable gris", precio: 129, imagen: "imagenes/combo-bano.jpg" },
   { sku: "COMBO-BAÑERA-PLEGABLE-BEBE-ROSA", nombre: "Combo baño bañera plegable morado", precio: 129, imagen: "imagenes/combo-bano.jpg" },
   { sku: "COMBO-BAÑERA-PLEGABLE-BEBE-FUCSIA", nombre: "Combo baño bañera plegable fucsia (agotado)", precio: 129, imagen: "imagenes/combo-bano.jpg" },
+
+  
+
+  { sku: "MESA-CAMBIO-BEBE", nombre: "Bañera cambiador con Termometro 2 en 1", precio: 239, imagen: "imagenes/MESA-CAMBIO-BEBE" },
+
+  
   { sku: "ESTANTE-PAÑALES-5049", nombre: "Organizador 3 niveles con canastas y ganchos", precio: 79, imagen: "imagenes/organizador-3-niveles-con-canastas-y-ganchos.jpg" },
   { sku: "MECEDORA-SIMPLE-BEIGE", nombre: "Mecedora manual ajustable", precio: 49, imagen: "imagenes/mecedora-manual-para-bebe-ajustable-y-comoda.jpg" },
   { sku: "MECEDORA-AUTOMATICA-ROSADO", nombre: "Mecedora eléctrica Baby Cam Melody rosado", precio: 269, imagen: "imagenes/mecedora-electrica-baby-cam-modelo-melody.jpg" },
