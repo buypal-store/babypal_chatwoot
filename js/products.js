@@ -1,6 +1,6 @@
 window.productosData = [
   // --- EXTRACTORES DE LECHE ---
- { sku: "EXTRACTOR-LECHE-MATERNA-S22", nombre: "Extractor eléctrico S22", precio: 149 , imagen: "imagenes/EXTRACTOR-LECHE-MATERNA-S22" },
+ { sku: "EXTRACTOR-LECHE-MATERNA-S22", nombre: "Extractor eléctrico S22", precio: 149 , imagen: "imagenes/EXTRACTOR-LECHE-MATERNA-S22.jpeg" },
 
 
 
@@ -23,7 +23,7 @@ window.productosData = [
   { sku: "PIGEON-BIBERON-240ML-PP", nombre: "Biberón Pigeon 240ml polipropileno", precio: 35, imagen: "imagenes/biberon-de-polipropileno-pigeon-libre-de-bpa-y-bps.jpg" },
   { sku: "PIGEON-BIBERON-330ML-PP", nombre: "Biberón Pigeon 330ml polipropileno", precio: 35, imagen: "imagenes/biberon-de-polipropileno-pigeon-libre-de-bpa-y-bps.jpg" },
   { sku: "PIGEON-BIBERON-240ML-V", nombre: "Biberón Pigeon 240ml de vidrio", precio: 79, imagen: "imagenes/biberon-pigeon-240ml-de-vidrio-libre-de-bpa-y-bps.jpg" },
-  { sku: "PIGEON-BIBERON-160ML-V", nombre: "Biberón Pigeon 160ml de vidrio", precio: 54, imagen: "imagenes/PIGEON-BIBERON-160ML-V" },
+  { sku: "PIGEON-BIBERON-160ML-V", nombre: "Biberón Pigeon 160ml de vidrio", precio: 54, imagen: "imagenes/PIGEON-BIBERON-160ML-V.jpeg" },
 
   
   { sku: "PIGEON-SET-ALMACENADOR-LECHE", nombre: "3 tazas de almacenamiento 160ml convertible en biberón", precio: 50, imagen: "imagenes/3-tazas-de-almacenamiento-160ml-convertible-en-biberon.jpg" },
@@ -81,7 +81,7 @@ window.productosData = [
 
   
 
-  { sku: "MESA-CAMBIO-BEBE", nombre: "Bañera cambiador con Termometro 2 en 1", precio: 239, imagen: "imagenes/MESA-CAMBIO-BEBE" },
+  { sku: "MESA-CAMBIO-BEBE", nombre: "Bañera cambiador con Termometro 2 en 1", precio: 239, imagen: "imagenes/MESA-CAMBIO-BEBE.jpeg" },
 
   
   { sku: "ESTANTE-PAÑALES-5049", nombre: "Organizador 3 niveles con canastas y ganchos", precio: 79, imagen: "imagenes/organizador-3-niveles-con-canastas-y-ganchos.jpg" },
