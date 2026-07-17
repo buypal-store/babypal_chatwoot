@@ -1,12 +1,12 @@
 window.productosData = [
   // --- EXTRACTORES DE LECHE ---
 
---------------------------------------------------------------------------------------------------------------------------------------------------------
+ // --- NUEVO --
   { sku: "PIGEON-LIMPIADOR-LIQUIDO-200ML", nombre: "Limpiador de biberones Pigeon 200ml", precio: 0 , imagen: "" },
   { sku: "ESTERILIZADOR-BIBERON", nombre: "Esterilizador Biberón", precio: 79 , imagen: "" },
   { sku: "MOCHILA-CALENTADOR-AZUL-CON-BLOQUE", nombre: "Mochila Calentador Azul con Bloque", precio: 89 , imagen: "" },
   { sku: "MOCHILA-CALENTADOR-ROSADO-CON-BLOQUE", nombre: "Mochila Calentador Rosado con Bloque", precio: 89 , imagen: "" },
---------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
   
   { sku: "EXTRACTOR-LECHE-MATERNA-S22", nombre: "Extractor eléctrico S22", precio: 149 , imagen: "imagenes/EXTRACTOR-LECHE-MATERNA-S22.jpeg" },
