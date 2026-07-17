@@ -1,10 +1,15 @@
 window.productosData = [
   // --- EXTRACTORES DE LECHE ---
- { sku: "EXTRACTOR-LECHE-MATERNA-S22", nombre: "Extractor eléctrico S22", precio: 149 , imagen: "imagenes/EXTRACTOR-LECHE-MATERNA-S22.jpeg" },
 
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+  { sku: "PIGEON-LIMPIADOR-LIQUIDO-200ML", nombre: "Limpiador de biberones Pigeon 200ml", precio: 0 , imagen: "" },
+  { sku: "ESTERILIZADOR-BIBERON", nombre: "Esterilizador Biberón", precio: 79 , imagen: "" },
+  { sku: "MOCHILA-CALENTADOR-AZUL-CON-BLOQUE", nombre: "Mochila Calentador Azul con Bloque", precio: 89 , imagen: "" },
+  { sku: "MOCHILA-CALENTADOR-ROSADO-CON-BLOQUE", nombre: "Mochila Calentador Rosado con Bloque", precio: 89 , imagen: "" },
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 
   
+  { sku: "EXTRACTOR-LECHE-MATERNA-S22", nombre: "Extractor eléctrico S22", precio: 149 , imagen: "imagenes/EXTRACTOR-LECHE-MATERNA-S22.jpeg" },
   { sku: "EXTRACTOR-S20", nombre: "Extractor eléctrico S20 pezón plano e invertido", precio: 129, imagen: "imagenes/extractor-electrica-s20-para-pezon-plano-e-invertido.jpg" },
   { sku: "EXTRACTOR-S22-NUEVO", nombre: "Extractor S22 3ra generación Para Mamás con mucha Producción", precio: 179, imagen: "imagenes/3ra-generacion-s22-para-mamas-con-mucha-produccion.jpg" },
   { sku: "EXTRACTOR-LECHE-MATERNA-S09", nombre: "Extractor S09 2da generación pezón sensible", precio: 139, imagen: "imagenes/2da-generacion-extractor-s09-para-pezon-sensible.jpg" },
