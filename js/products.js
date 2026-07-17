@@ -3,10 +3,11 @@ window.productosData = [
 
  // --- NUEVO --
   { sku: "PIGEON-LIMPIADOR-LIQUIDO-200ML", nombre: "Limpiador de biberones Pigeon 200ml", precio: 0 , imagen: "" },
-  { sku: "ESTERILIZADOR-BIBERON", nombre: "Esterilizador Biberón", precio: 79 , imagen: "" },
+  { sku: "ESTERILIZADOR-BIBERON", nombre: "Esterilizador Biberón", precio: 79 , imagen: "imagenes/esterilizador-multifuncion-3-funciones-en-1.jpg" },
   { sku: "MOCHILA-CALENTADOR-AZUL-CON-BLOQUE", nombre: "Mochila Calentador Azul con Bloque", precio: 89 , imagen: "" },
   { sku: "MOCHILA-CALENTADOR-ROSADO-CON-BLOQUE", nombre: "Mochila Calentador Rosado con Bloque", precio: 89 , imagen: "" },
-
+  { sku: "PROTECTOR-BIBERON-160ML", nombre: "Protector Biberon 160ml", precio: 10 , imagen: "" },
+  { sku: "PROTECTOR-BIBERON-240ML", nombre: "Protector Biberon 240ml", precio: 10 , imagen: "" },
 
   
   { sku: "EXTRACTOR-LECHE-MATERNA-S22", nombre: "Extractor eléctrico S22", precio: 149 , imagen: "imagenes/EXTRACTOR-LECHE-MATERNA-S22.jpeg" },
@@ -120,10 +121,14 @@ window.productosData = [
 
   { sku: "BOLSA-LECHE-30-UNID", nombre: "Bolsa de Leche 30 unidades", precio: 29, imagen: "regalos/BOLSAS DE LECHE.jpeg" },
   { sku: "CONCHA-RECOLECTORA", nombre: "Conchas Recolectoras", precio: 29, imagen: "regalos/Conchas-recolectoras.png" },
- { sku: "REGADERA-BEBE", nombre: "Gorro de baño corona celeste", precio: 19, imagen: "regalos/regadera_cojin_bebe.jpg" },
- { sku: "PIGEON-SET-ALMACENADOR-LECHE", nombre: "3 Almacenadores de Leche", precio: 19, imagen: "regalos/Set de 3 Frascos Recolectores.jpeg" },
+  { sku: "REGADERA-BEBE", nombre: "Gorro de baño corona celeste", precio: 19, imagen: "regalos/regadera_cojin_bebe.jpg" },
+  { sku: "PIGEON-SET-ALMACENADOR-LECHE", nombre: "3 Almacenadores de Leche", precio: 19, imagen: "regalos/Set de 3 Frascos Recolectores.jpeg" },
 
-  
+   { sku: "BATA-BEBES-VERDE", nombre: "Toalla de baño verde 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
+   { sku: "BATA-BEBES-GRIS", nombre: "Toalla de baño gris 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
+   { sku: "BATA-BEBES-CREMA", nombre: "Toalla de baño con capucha crema 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
+   { sku: "BATA-BEBES-ROSA", nombre: "Toalla de baño con capucha rosa 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
+   { sku: "BATA-BEBES-MARRON", nombre: "Toalla de baño con capucha gris 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
 
  
  
@@ -153,11 +158,7 @@ window.productosData = [
   { sku: "COJIN-BAÑERA-ROSA", nombre: "Cojín de baño ergonómico rosa", precio: 35, imagen: "imagenes/cojin-de-bano-ergonomico-para-bebe-comodo-y-seguro.jpg" },
   { sku: "COJIN-BAÑERA-ESTRELLAS-BLANCA", nombre: "Cojín de baño ergonómico estrellas blanco", precio: 35, imagen: "imagenes/cojin-de-bano-ergonomico-para-bebe-comodo-y-seguro.jpg" },
   { sku: "COJIN-BAÑERA-ESTRELLAS-VERDE", nombre: "Cojín de baño ergonómico estrellas verde", precio: 35, imagen: "imagenes/cojin-de-bano-ergonomico-para-bebe-comodo-y-seguro.jpg" },
-  { sku: "BATA-BEBES-VERDE", nombre: "Toalla de baño verde 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
-  { sku: "BATA-BEBES-GRIS", nombre: "Toalla de baño gris 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
-  { sku: "BATA-BEBES-CREMA", nombre: "Toalla de baño con capucha crema 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
-  { sku: "BATA-BEBES-ROSA", nombre: "Toalla de baño con capucha rosa 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
-  { sku: "BATA-BEBES-MARRON", nombre: "Toalla de baño con capucha gris 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
+  
 
   // --- ACCESORIOS ---
   { sku: "GANCHO-BEBE", nombre: "3 set accesorios para el cabello (promo 3x1)", precio: 15, imagen: "imagenes/3-set-accesorios-para-el-cabello.jpg" },
