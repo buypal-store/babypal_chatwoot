@@ -454,8 +454,12 @@ function init() {
 
   el("btnVerPedido")?.addEventListener("click", abrirResumen);
   el("btnClear")?.addEventListener("click", () => {
-    if (confirm("¿Vaciar todo el carrito?")) vaciarCarrito();
-  });
+    vaciarCarrito();
+    // Si el modal de resumen está abierto, lo cerramos también para evitar verlo vacío
+    if (el("summaryModal") && !el("summaryModal").classList.contains("hidden")) {
+        cerrarResumen();
+    }
+});
   el("summaryClose")?.addEventListener("click", cerrarResumen);
   el("pedidoClose")?.addEventListener("click", cerrarPedidoFinal);
   el("btnEnviarPedido")?.addEventListener("click", enviarPedido);
