@@ -33,7 +33,11 @@ function renderGrid() {
         <div class="card-name">${prod.nombre || 'Escalera'}</div>
         <div class="card-meta">
           <span class="sku-display">${prod.sku || ''}</span>
-          <div class="price">${formatPEN(prod.precio)}</div>
+          <input type="number"
+                 class="price-input"
+                 value="${prod.precio}"
+                 data-original="${prod.precio}"
+                 style="width:90px; text-align:right; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 8px; background:#fff;" />
         </div>
       </div>
       <div class="card-actions">
@@ -43,17 +47,41 @@ function renderGrid() {
     grid.appendChild(card);
   });
 
-  // Eventos de los botones "Agregar" (SOLO el producto, sin regalo automático)
+  // Eventos de los inputs de precio
+  document.querySelectorAll('.price-input').forEach(input => {
+    // Al hacer foco, seleccionamos todo el contenido para que al escribir se borre
+    input.addEventListener('focus', function() {
+      this.select();
+    });
+    // Al salir del campo sin escribir nada, restauramos el precio original
+    input.addEventListener('blur', function() {
+      const val = this.value.trim();
+      if (val === '' || isNaN(Number(val))) {
+        this.value = this.dataset.original;
+      }
+    });
+  });
+
+  // Eventos de los botones "Agregar"
   document.querySelectorAll('.btn-agregar').forEach(btn => {
     btn.addEventListener('click', function (e) {
       const index = parseInt(this.dataset.index);
       const prod = productos[index];
 
+      // Obtenemos el input de precio de esta misma tarjeta
+      const priceInput = this.closest('.card').querySelector('.price-input');
+      let precio = Number(priceInput.value);
+      // Si por alguna razón es inválido, tomamos el original
+      if (isNaN(precio) || precio < 0) {
+        precio = Number(priceInput.dataset.original) || 0;
+        priceInput.value = precio; // corregir visualmente
+      }
+
       state.cart.push({
         cartId: ++state.cartSeq,
         sku: prod.sku,
         nombre: prod.nombre || 'Escalera',
-        precio: Number(prod.precio) || 0,
+        precio: precio,
         type: 'escalera'
       });
 
