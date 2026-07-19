@@ -33,11 +33,7 @@ function renderGrid() {
         <div class="card-name">${prod.nombre || 'Escalera'}</div>
         <div class="card-meta">
           <span class="sku-display">${prod.sku || ''}</span>
-          <input type="number"
-                 class="price-input"
-                 value="${prod.precio}"
-                 data-original="${prod.precio}"
-                 style="width:90px; text-align:right; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 8px; background:#fff;" />
+          <div class="price">${formatPEN(prod.precio)}</div>
         </div>
       </div>
       <div class="card-actions">
@@ -47,41 +43,18 @@ function renderGrid() {
     grid.appendChild(card);
   });
 
-  // Eventos de los inputs de precio
-  document.querySelectorAll('.price-input').forEach(input => {
-    // Al hacer foco, seleccionamos todo el contenido para que al escribir se borre
-    input.addEventListener('focus', function() {
-      this.select();
-    });
-    // Al salir del campo sin escribir nada, restauramos el precio original
-    input.addEventListener('blur', function() {
-      const val = this.value.trim();
-      if (val === '' || isNaN(Number(val))) {
-        this.value = this.dataset.original;
-      }
-    });
-  });
-
-  // Eventos de los botones "Agregar"
+  // Eventos de los botones "Agregar" (SOLO el producto, sin regalo automático)
   document.querySelectorAll('.btn-agregar').forEach(btn => {
     btn.addEventListener('click', function (e) {
       const index = parseInt(this.dataset.index);
       const prod = productos[index];
 
-      // Obtenemos el input de precio de esta misma tarjeta
-      const priceInput = this.closest('.card').querySelector('.price-input');
-      let precio = Number(priceInput.value);
-      // Si por alguna razón es inválido, tomamos el original
-      if (isNaN(precio) || precio < 0) {
-        precio = Number(priceInput.dataset.original) || 0;
-        priceInput.value = precio; // corregir visualmente
-      }
-
       state.cart.push({
         cartId: ++state.cartSeq,
         sku: prod.sku,
         nombre: prod.nombre || 'Escalera',
-        precio: precio,
+        precio: Number(prod.precio) || 0,
+        originalPrice: Number(prod.precio) || 0,   // 👈 esto es nuevo
         type: 'escalera'
       });
 
@@ -177,7 +150,14 @@ function renderResumen() {
     row.innerHTML = `
       <td style="padding:6px 8px; border-bottom:1px solid var(--border); font-size:11px; color:var(--muted);">${item.sku}</td>
       <td style="padding:6px 8px; border-bottom:1px solid var(--border);">${item.nombre}</td>
-      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:right; font-weight:700;">${formatPEN(item.precio)}</td>
+      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:right; font-weight:700;">
+        <input type="number"
+               class="resumen-price-input"
+               value="${item.precio}"
+               data-original="${item.originalPrice ?? item.precio}"
+               data-cart-id="${item.cartId}"
+               style="width:90px; text-align:right; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 8px; background:#fff;" />
+      </td>
       <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:center;">
         <button class="btn-regalo-toggle" data-cart-id="${item.cartId}" style="cursor:pointer; font-size:16px; background:none; border:none;" title="Alternar regalo">${item.precio === 0 ? '🎁' : '🎁'}</button>
       </td>
@@ -185,7 +165,58 @@ function renderResumen() {
     tbody.appendChild(row);
   });
 
-  // Asignar eventos a los botones de regalo
+  // --- NUEVO: Eventos de los inputs de precio en el resumen ---
+  document.querySelectorAll('.resumen-price-input').forEach(input => {
+    // Seleccionar todo al hacer foco (se borra listo para escribir)
+    input.addEventListener('focus', function() {
+      this.select();
+    });
+
+    // Al salir del campo, validar y actualizar estado
+    input.addEventListener('blur', function() {
+      const val = this.value.trim();
+      const cartId = parseInt(this.dataset.cartId);
+      const item = state.cart.find(i => i.cartId === cartId);
+      if (!item) return;
+
+      if (val === '' || isNaN(Number(val))) {
+        // Vacío o inválido → restaurar precio original
+        this.value = this.dataset.original;
+        item.precio = Number(this.dataset.original);
+      } else {
+        const nuevoPrecio = Number(val);
+        item.precio = nuevoPrecio;
+
+        // Si el precio es >0 y el producto estaba como regalo, quitamos el estado regalo
+        if (nuevoPrecio > 0 && item.regaloOriginalPrice !== undefined) {
+          delete item.regaloOriginalPrice;
+          // Actualizar visual del botón de regalo (pasa de 🎁 a 🎁 pero lógica consistente)
+          const btn = document.querySelector(`.btn-regalo-toggle[data-cart-id="${cartId}"]`);
+          if (btn) btn.textContent = '🎁';
+        }
+      }
+
+      // Recalcular subtotales y actualizar la vista de totales
+      const nuevoSubtotal = state.cart.reduce((sum, i) => sum + i.precio, 0);
+      state.finalTotal = nuevoSubtotal;   // reseteamos precio final al nuevo subtotal
+      if (el("inputPrecioFinal")) el("inputPrecioFinal").value = nuevoSubtotal;
+      if (el("resumenFinal")) el("resumenFinal").textContent = formatPEN(nuevoSubtotal);
+    });
+
+    // (Opcional) Actualizar el total en tiempo real mientras se escribe
+    input.addEventListener('input', function() {
+      const tempVal = Number(this.value) || 0;
+      const cartId = parseInt(this.dataset.cartId);
+      const subtotalTemporal = state.cart.reduce((sum, i) => {
+        if (i.cartId === cartId) return sum + tempVal;
+        return sum + i.precio;
+      }, 0);
+      if (el("resumenFinal")) el("resumenFinal").textContent = formatPEN(subtotalTemporal);
+      if (el("inputPrecioFinal")) el("inputPrecioFinal").value = subtotalTemporal;
+    });
+  });
+
+  // Asignar eventos a los botones de regalo (sin cambios)
   document.querySelectorAll('.btn-regalo-toggle').forEach(btn => {
     btn.addEventListener('click', function(e) {
       const cartId = parseInt(this.dataset.cartId);
@@ -193,7 +224,7 @@ function renderResumen() {
     });
   });
 
-  // Totales
+  // Totales (el input de precio final se mantiene sincronizado)
   const totalBlock = document.createElement("div");
   totalBlock.className = "summary-totals";
   totalBlock.innerHTML = `
