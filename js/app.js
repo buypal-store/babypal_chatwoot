@@ -10,7 +10,15 @@ const state = {
 };
 
 const el = (id) => document.getElementById(id);
-
+// Quita tildes, pasa a minúsculas y convierte separadores en espacios
+function normalizar(txt) {
+  return String(txt || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')   // elimina diacríticos (á→a, ñ→n)
+    .replace(/[^a-z0-9]+/g, ' ')        // guiones, puntos, slashes → espacio
+    .trim();
+}
 function formatPEN(n) {
   return `S/ ${Math.round(Number(n) || 0)}`;
 }
@@ -23,25 +31,32 @@ function renderGrid() {
 
   const productos = window.productosData || [];
   productos.forEach((prod, index) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="card-img">
-        <img src="${prod.imagen || 'assets/images/placeholder.jpg'}" alt="${prod.nombre || 'Escalera'}">
+  const card = document.createElement("div");
+  card.className = "card";
+
+  // 👇 NUEVO: índice de búsqueda precalculado
+  const campos = [prod.sku, prod.nombre, prod.marca, prod.categoria, prod.descripcion];
+  const hay = normalizar(campos.filter(Boolean).join(' '));
+  card.dataset.search = hay;                        // "tetina pigeon 3m ..."
+  card.dataset.searchCompact = hay.replace(/\s/g, ''); // "tetinapigeon3m..."
+
+  card.innerHTML = `
+    <div class="card-img">
+      <img src="${prod.imagen || 'assets/images/placeholder.jpg'}" alt="${prod.nombre || 'Escalera'}">
+    </div>
+    <div class="card-body">
+      <div class="card-name">${prod.nombre || 'Escalera'}</div>
+      <div class="card-meta">
+        <span class="sku-display">${prod.sku || ''}</span>
+        <div class="price">${formatPEN(prod.precio)}</div>
       </div>
-      <div class="card-body">
-        <div class="card-name">${prod.nombre || 'Escalera'}</div>
-        <div class="card-meta">
-          <span class="sku-display">${prod.sku || ''}</span>
-          <div class="price">${formatPEN(prod.precio)}</div>
-        </div>
-      </div>
-      <div class="card-actions">
-        <button class="btn small btn-agregar" data-index="${index}">Agregar</button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
+    </div>
+    <div class="card-actions">
+      <button class="btn small btn-agregar" data-index="${index}">Agregar</button>
+    </div>
+  `;
+  grid.appendChild(card);
+});
 
   // Eventos de los botones "Agregar" (SOLO el producto, sin regalo automático)
   document.querySelectorAll('.btn-agregar').forEach(btn => {
@@ -436,14 +451,39 @@ function autocompletarCampos(datos) {
 function bindSearch() {
   const searchInput = el("searchInput");
   if (!searchInput) return;
+
   searchInput.addEventListener("input", function (e) {
-    const term = e.target.value.trim().toLowerCase();
+    const tokens = normalizar(e.target.value).split(' ').filter(Boolean);
     const cards = document.querySelectorAll('.card');
+    let visibles = 0;
+
     cards.forEach(card => {
-      const skuDisplay = card.querySelector('.sku-display');
-      const sku = (skuDisplay?.textContent || '').toLowerCase();
-      card.style.display = sku.includes(term) ? '' : 'none';
+      const hay = card.dataset.search || '';
+      const compact = card.dataset.searchCompact || '';
+
+      // Todos los tokens deben aparecer (AND), en cualquier orden
+      const match = tokens.length === 0 || tokens.every(t =>
+        hay.includes(t) || compact.includes(t)
+      );
+
+      card.style.display = match ? '' : 'none';
+      if (match) visibles++;
     });
+
+    // Aviso cuando no hay resultados
+    let aviso = el("searchEmpty");
+    if (visibles === 0 && tokens.length > 0) {
+      if (!aviso) {
+        aviso = document.createElement("div");
+        aviso.id = "searchEmpty";
+        aviso.style.cssText = "padding:24px; text-align:center; color:var(--muted); grid-column:1/-1;";
+        el("productGrid")?.appendChild(aviso);
+      }
+      aviso.textContent = `Sin resultados para "${e.target.value.trim()}"`;
+      aviso.style.display = '';
+    } else if (aviso) {
+      aviso.style.display = 'none';
+    }
   });
 }
 
