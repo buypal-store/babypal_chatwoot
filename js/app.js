@@ -504,12 +504,109 @@ function bindSearch() {
     }
   });
 }
+// ---------- AGREGAR PRODUCTO PERSONALIZADO ----------
+function cargarProductosCustom() {
+  const clave = "customProducts_" + (window.catalogoId || "default");
+  const guardados = JSON.parse(localStorage.getItem(clave) || "[]");
+  const productos = window.productosData || [];
+  guardados.forEach(p => {
+    if (!productos.some(existing => existing.sku === p.sku)) {
+      productos.push(p);
+    }
+  });
+}
 
+function crearModalNuevoProducto() {
+  if (el("nuevoProductoModal")) return;
+  const modal = document.createElement("div");
+  modal.id = "nuevoProductoModal";
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;";
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;width:90%;max-width:400px;box-shadow:0 12px 40px rgba(0,0,0,.15);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 style="margin:0;font-size:18px;">➕ Nuevo producto</h3>
+        <button id="cerrarNuevoProducto" style="background:none;border:none;font-size:22px;cursor:pointer;color:#999;">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <input id="nuevoSKU" placeholder="SKU (ej: PROD-001)" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
+        <input id="nuevoNombre" placeholder="Nombre del producto" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
+        <input id="nuevoPrecio" type="number" placeholder="Precio (S/) — puede ser 0" min="0" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
+        <button id="btnGuardarNuevoProducto" style="padding:12px;background:var(--accent,#2563eb);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;">
+          Agregar al catálogo
+        </button>
+        <p id="nuevoProductoMsg" style="display:none;text-align:center;font-size:13px;margin:4px 0 0;"></p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  el("cerrarNuevoProducto").addEventListener("click", cerrarNuevoProducto);
+  modal.addEventListener("click", (e) => { if (e.target === modal) cerrarNuevoProducto(); });
+  el("btnGuardarNuevoProducto").addEventListener("click", guardarNuevoProducto);
+}
+
+function abrirNuevoProducto() {
+  if (!el("nuevoProductoModal")) crearModalNuevoProducto();
+  const modal = el("nuevoProductoModal");
+  modal.style.display = "flex";
+  el("nuevoSKU").value = "";
+  el("nuevoNombre").value = "";
+  el("nuevoPrecio").value = "";
+  el("nuevoProductoMsg").style.display = "none";
+  el("nuevoSKU").focus();
+}
+
+function cerrarNuevoProducto() {
+  const modal = el("nuevoProductoModal");
+  if (modal) modal.style.display = "none";
+}
+
+function guardarNuevoProducto() {
+  const sku = el("nuevoSKU").value.trim().toUpperCase();
+  const nombre = el("nuevoNombre").value.trim();
+  const precio = Number(el("nuevoPrecio").value) || 0;
+  const msg = el("nuevoProductoMsg");
+
+  if (!sku || !nombre) {
+    msg.textContent = "⚠️ SKU y nombre son obligatorios";
+    msg.style.color = "#ef4444";
+    msg.style.display = "block";
+    return;
+  }
+
+  const productos = window.productosData || [];
+  if (productos.some(p => p.sku === sku)) {
+    msg.textContent = "⚠️ Ese SKU ya existe en el catálogo";
+    msg.style.color = "#ef4444";
+    msg.style.display = "block";
+    return;
+  }
+
+  const nuevoProducto = { sku, nombre, precio, imagen: "", custom: true };
+  productos.push(nuevoProducto);
+
+  // Persistir en localStorage por catálogo
+  const clave = "customProducts_" + (window.catalogoId || "default");
+  const guardados = JSON.parse(localStorage.getItem(clave) || "[]");
+  guardados.push(nuevoProducto);
+  localStorage.setItem(clave, JSON.stringify(guardados));
+
+  renderGrid();
+
+  msg.textContent = `✅ "${nombre}" agregado`;
+  msg.style.color = "#22c55e";
+  msg.style.display = "block";
+  el("nuevoSKU").value = "";
+  el("nuevoNombre").value = "";
+  el("nuevoPrecio").value = "";
+  el("nuevoSKU").focus();
+}
 // ---------- INICIALIZACIÓN ----------
 function init() {
+  cargarProductosCustom();
   renderGrid();
   bindSearch();
 
+  el("btnNuevoProducto")?.addEventListener("click", abrirNuevoProducto);
   el("btnVerPedido")?.addEventListener("click", abrirResumen);
   el("btnClear")?.addEventListener("click", () => {
     vaciarCarrito();
