@@ -1,7 +1,4 @@
 window.productosData = [
-  // --- EXTRACTORES DE LECHE ---
-
- // --- NUEVO --
   { sku: "PIGEON-LIMPIADOR-LIQUIDO-200ML", nombre: "Limpiador de biberones Pigeon 200ml", precio: 0 , imagen: "" },
   { sku: "ESTERILIZADOR-BIBERON", nombre: "Esterilizador Biberón", precio: 79 , imagen: "imagenes/esterilizador-multifuncion-3-funciones-en-1.jpg" },
   { sku: "MOCHILA-CALENTADOR-AZUL", nombre: "Mochila Calentador Azul con Bloque", precio: 89 , imagen: "" },
@@ -18,13 +15,19 @@ window.productosData = [
   { sku: "EXTRACTOR-DOBLE-MY372", nombre: "Extractor doble MY-372 grado hospitalario", precio: 169, imagen: "imagenes/extractor-my-372-de-grado-hospitalario.jpg" },
   { sku: "MOMCOZY-M5", nombre: "Extractor Momcozy M5", precio: 899, imagen: "imagenes/extractor-momcozy-modelo-m5.jpg" },
 
-  // --- COMPLEMENTOS DE LACTANCIA ---
+ 
   { sku: "MASAJEADOR-PEZON", nombre: "Masajeador de pecho 10 modos vibración y calor", precio: 69, imagen: "imagenes/masajeador-de-pecho-10-modos-de-vibracion-y-calor.jpg" },
   { sku: "RECOLECTOR-LECHE-PP", nombre: "Recolector de leche 120ml silicona libre de BPA", precio: 19, imagen: "imagenes/recolector-de-leche-120ml-silicona-libre-de-bpa.jpg" },
   { sku: "PIGEON-ASPIRADOR-NASAL-MANUAL", nombre: "Aspirador nasal Pigeon tipo tubo", precio: 42, imagen: "imagenes/aspirador-nasal-pigeon-tipo-tubo.jpg" },
+  { sku: "PACK-3-RECOLECTOR-LECHE-PP", nombre: "Pack 3 Recolector de Leche", precio: 39, imagen: "" },
+  { sku: "LONCHERA-EXTRACTOR-DUAL", nombre: "Loncheras de Extractores Dual", precio: 35, imagen: "" },
+  { sku: "LONCHERA-EXTRACTOR-SIMPLE", nombre: "Loncheras de Extractor Simple", precio: 30, imagen: "" },
 
-  // --- BIBERONES Y FRASCOS ---
-  //{ sku: "COPA-RECOLECTORA", nombre: "Recolector de leche Pigeon silicona 120ml", precio: 69, imagen: "imagenes/recolector-de-leche-pigeon-silicona-120ml-sin-bpa.jpg" },
+
+
+  
+
+  { sku: "COPA-RECOLECTORA", nombre: "Recolector de leche Pigeon silicona 120ml", precio: 69, imagen: "imagenes/recolector-de-leche-pigeon-silicona-120ml-sin-bpa.jpg" },
   { sku: "PIGEON-BIBERON-160ML-PP", nombre: "Biberón Pigeon 160ml polipropileno", precio: 35, imagen: "imagenes/biberon-de-polipropileno-pigeon-libre-de-bpa-y-bps.jpg" },
   { sku: "PIGEON-BIBERON-240ML-PP", nombre: "Biberón Pigeon 240ml polipropileno", precio: 35, imagen: "imagenes/biberon-de-polipropileno-pigeon-libre-de-bpa-y-bps.jpg" },
   { sku: "PIGEON-BIBERON-330ML-PP", nombre: "Biberón Pigeon 330ml polipropileno", precio: 35, imagen: "imagenes/biberon-de-polipropileno-pigeon-libre-de-bpa-y-bps.jpg" },
@@ -35,7 +38,6 @@ window.productosData = [
   { sku: "PIGEON-SET-ALMACENADOR-LECHE", nombre: "3 tazas de almacenamiento 160ml convertible en biberón", precio: 50, imagen: "imagenes/3-tazas-de-almacenamiento-160ml-convertible-en-biberon.jpg" },
   { sku: "CHUPON-SUAVINEX", nombre: "Chupón Suavinex Zero Zero 0 a 6 meses", precio: 45, imagen: "imagenes/chupon-suavinex-zero-zero-para-bebes-de-0-a-6-meses.jpg" },
 
-  // --- TETINAS PIGEON ---
   { sku: "PIGEON-TETINA-SS (0+)", nombre: "Tetina Pigeon SS (0+)", precio: 29, imagen: "imagenes/tetina-pigeon-de-silicona-con-sistema-anticolico.jpg" },
   { sku: "PIGEON-TETINA-S (+1)", nombre: "Tetina Pigeon S (+1)", precio: 29, imagen: "imagenes/tetina-pigeon-de-silicona-con-sistema-anticolico.jpg" },
   { sku: "PIGEON-TETINA-M (+3)", nombre: "Tetina Pigeon M (+3)", precio: 29, imagen: "imagenes/tetina-pigeon-de-silicona-con-sistema-anticolico.jpg" },
@@ -43,7 +45,7 @@ window.productosData = [
   { sku: "PIGEON-TETINA-LL (+9)", nombre: "Tetina Pigeon LL (+9)", precio: 29, imagen: "imagenes/tetina-pigeon-de-silicona-con-sistema-anticolico.jpg" },
   { sku: "PIGEON-TETINA-LLL (+15)", nombre: "Tetina Pigeon LLL (+15)", precio: 29, imagen: "imagenes/tetina-pigeon-de-silicona-con-sistema-anticolico.jpg" },
 
-  // --- LIMPIEZA DE BIBERONES ---
+  
   { sku: "DISPENSADOR-ALIMENTOS-36482-ROSA", nombre: "Dispensador de fórmula 3 capas rosa", precio: 15, imagen: "imagenes/dispensador-para-formula-de-3-capas.jpg" },
   { sku: "DISPENSADOR-ALIMENTOS-36482-VERDE", nombre: "Dispensador de fórmula 3 capas verde", precio: 15, imagen: "imagenes/dispensador-para-formula-de-3-capas.jpg" },
   { sku: "CEPILLO-BIBERON-ROSA", nombre: "Set limpiador de biberones rosa", precio: 25, imagen: "imagenes/set-limpiador-de-biberones.jpg" },
@@ -53,12 +55,12 @@ window.productosData = [
   { sku: "CEPILLO-BIBERON-RS13752-ROSA", nombre: "Cepillo de biberón eléctrico 3 en 1 rosa", precio: 39, imagen: "imagenes/cepillo-de-biberon-electrico-3-en-1-recargable.jpg" },
   { sku: "CEPILLO-BIBERON-RS13752-BEIGE", nombre: "Cepillo de biberón eléctrico 3 en 1 beige", precio: 39, imagen: "imagenes/cepillo-de-biberon-electrico-3-en-1-recargable.jpg" },
 
-  // --- LÍQUIDO LIMPIADOR ---
+  
   { sku: "PIGEON-LIMPIADOR-LIQUIDO-450ML", nombre: "Limpiador de biberones Pigeon 450ml", precio: 39, imagen: "imagenes/limpiador-de-biberones-pigeon-450ml.jpg" },
   { sku: "PIGEON-LIMPIADOR-REFILL-450ML", nombre: "Limpiador de biberones Pigeon refill 450ml", precio: 19, imagen: "imagenes/limpiador-de-biberones-pigeon-refill-450ml.jpg" },
   { sku: "PIGEON-LIMPIADOR-LIQUIDO-700ML", nombre: "Limpiador de biberones Pigeon 700ml", precio: 55, imagen: "imagenes/limpiador-de-biberones-pigeon-700ml.jpg" },
 
-  // --- MATERNIDAD ---
+  
   { sku: "PIGEON-CREMA-HIDRATANTE-7GR", nombre: "Crema lanolina pezones 7g", precio: 32, imagen: "imagenes/crema-lanolina-para-pezones-sensibles-y-piel-agrietada-7g.jpg" },
   { sku: "PIGEON-CREMA-HIDRATANTE-40GR", nombre: "Crema lanolina pezones 40g", precio: 55, imagen: "imagenes/crema-lanolina-para-pezones-sensibles-y-piel-agrietada-40g.jpg" },
   { sku: "PIGEON-PACK-TERAPIA-PEZON", nombre: "Pack de terapia para pechos calor y frío", precio: 84, imagen: "imagenes/pack-de-terapia-para-pechos-con-calor-y-frio.jpg" },
@@ -102,13 +104,19 @@ window.productosData = [
   { sku: "PELUCHE-ARRULLADOR-PATO", nombre: "Peluche arrullador con control remoto cisne", precio: 89, imagen: "imagenes/peluche-arrullador-con-control-remoto.jpg" },
   { sku: "PELUCHE-ARRULLADOR-CONEJA", nombre: "Peluche arrullador con control remoto coneja", precio: 89, imagen: "imagenes/peluche-arrullador-con-control-remoto.jpg" },
   { sku: "PELUCHE-ARRULLADOR-DINO", nombre: "Peluche arrullador con control remoto jirafa", precio: 89, imagen: "imagenes/peluche-arrullador-con-control-remoto.jpg" },
+  { sku: "CAMA-CONEJA-ROSA", nombre: "Cama Coneja Rosa", precio: 119, imagen: "" },
+  { sku: "CAMA-DRAGON-AZUL", nombre: "Cama Dragón Azul", precio: 119, imagen: "" },
+  
+
+  
   { sku: "BRASIER-TALLA-36", nombre: "Brasier de lactancia talla 36", precio: 19, imagen: "imagenes/brasier-de-lactancia-de-algodon-talla-36-38-40-y-42.jpg" },
   { sku: "BRASIER-TALLA-38", nombre: "Brasier de lactancia talla 38", precio: 19, imagen: "imagenes/brasier-de-lactancia-de-algodon-talla-36-38-40-y-42.jpg" },
   { sku: "BRASIER-TALLA-40", nombre: "Brasier de lactancia talla 40", precio: 19, imagen: "imagenes/brasier-de-lactancia-de-algodon-talla-36-38-40-y-42.jpg" },
   { sku: "BRASIER-TALLA-42", nombre: "Brasier de lactancia talla 42", precio: 19, imagen: "imagenes/brasier-de-lactancia-de-algodon-talla-36-38-40-y-42.jpg" },
   { sku: "FAJA-POSTPARTO-M", nombre: "Faja post parto 3 piezas talla M", precio: 59, imagen: "imagenes/faja-post-parto-3-piezas-cesarea-y-parto-natural.jpg" },
   { sku: "FAJA-POSTPARTO-L", nombre: "Faja post parto 3 piezas talla L", precio: 59, imagen: "imagenes/faja-post-parto-3-piezas-cesarea-y-parto-natural.jpg" },
-  { sku: "FAJA-POSTPARTO", nombre: "Faja post parto 3 piezas talla XXL", precio: 59, imagen: "imagenes/faja-post-parto-3-piezas-cesarea-y-parto-natural.jpg" },
+  { sku: "FAJA-POSTPARTO-S", nombre: "Faja post parto 3 piezas talla S", precio: 59, imagen: "imagenes/faja-post-parto-3-piezas-cesarea-y-parto-natural.jpg" },
+  { sku: "FAJA-POSTPARTO-XL", nombre: "Faja post parto 3 piezas talla XL", precio: 59, imagen: "imagenes/faja-post-parto-3-piezas-cesarea-y-parto-natural.jpg" },
   { sku: "FULAR-BEBE-GRIS", nombre: "Fular para recién nacido transpirable ajustable", precio: 69, imagen: "imagenes/fular-para-recien-nacido-transpirable-ajustable.jpg" },
   { sku: "CANGURO-BEBE-AZUL", nombre: "Canguro evolutivo 2 en 1 mochila ergonómica y canguro", precio: 79, imagen: "imagenes/canguro-evolutivo-2-en-1-mochila-ergonomica-y-canguro.jpg" },
   { sku: "RANGER DUAL LENS - 5MP", nombre: "Cámara Imou Ranger Dual detección de llanto y caídas", precio: 229, imagen: "imagenes/camara-imou-ranger-dual-deteccion-de-llanto-y-caidas.jpg" },
@@ -124,16 +132,23 @@ window.productosData = [
   { sku: "REGADERA-BEBE", nombre: "Gorro de baño corona celeste", precio: 19, imagen: "regalos/regadera_cojin_bebe.jpg" },
   { sku: "PIGEON-SET-ALMACENADOR-LECHE", nombre: "3 Almacenadores de Leche", precio: 19, imagen: "regalos/Set de 3 Frascos Recolectores.jpeg" },
 
-   { sku: "BATA-BEBES-VERDE", nombre: "Toalla de baño verde 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
-   { sku: "BATA-BEBES-GRIS", nombre: "Toalla de baño gris 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
-   { sku: "BATA-BEBES-CREMA", nombre: "Toalla de baño con capucha crema 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
-   { sku: "BATA-BEBES-ROSA", nombre: "Toalla de baño con capucha rosa 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
-   { sku: "BATA-BEBES-MARRON", nombre: "Toalla de baño con capucha gris 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
+  { sku: "BATA-BEBES-VERDE", nombre: "Toalla de baño verde 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
+  { sku: "BATA-BEBES-GRIS", nombre: "Toalla de baño gris 138 x 69 cm", precio: 26, imagen: "imagenes/toalla-de-bano.jpg" },
+  { sku: "BATA-BEBES-CREMA", nombre: "Toalla de baño con capucha crema 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
+  { sku: "BATA-BEBES-ROSA", nombre: "Toalla de baño con capucha rosa 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
+  { sku: "BATA-BEBES-MARRON", nombre: "Toalla de baño con capucha gris 76 x 90 cm", precio: 26, imagen: "imagenes/toalla-de-bano-con-capucha.jpg" },
 
- 
- 
- 
- 
+  { sku: "CANGURO-BEBE-ALGODON", nombre: "Canguro Bebé Algodón", precio: 99, imagen: "" },
+  { sku: "CORRAL-BEBE-AZUL", nombre: "Corral Bebé Azul", precio: 89, imagen: "" },
+  { sku: "CORRAL-BEBE-ROSADO", nombre: "Corral Bebé Rosado", precio: 89, imagen: "" },
+  { sku: "CORRAL-BEBE-BEIGE", nombre: "Corral Bebé Beige", precio: 89, imagen: "" },
+  
+  { sku: "DIAFRAGMA-S22", nombre: "Diafragma S22", precio: 9, imagen: "" },
+  { sku: "BABY-TOWEL-BLUE", nombre: "Baby Towel Blue", precio: 29, imagen: "" },
+  { sku: "BABY-TOWEL-PINK", nombre: "Baby Towel Pink", precio: 29, imagen: "" },
+  { sku: "MECEDORA-AUTOMATICA-3-EN-1", nombre: "Mecedora Automatica 3 en 1", precio: 329, imagen: "" },
+  { sku: "MECEDORA-AUTOMATICA-GRIS", nombre: "Mecedora Automatica Gris", precio: 229, imagen: "" },
+  { sku: "MECEDORA-AUTOMATICA-CAFE", nombre: "Mecedora Automatica Café", precio: 229, imagen: "" },
  
  
  /*
