@@ -31,16 +31,16 @@ function renderGrid() {
 
   const productos = window.productosData || [];
   productos.forEach((prod, index) => {
-  const card = document.createElement("div");
-  card.className = "card";
+    const card = document.createElement("div");
+    card.className = "card";
 
-  // 👇 NUEVO: índice de búsqueda precalculado
-  const campos = [prod.sku, prod.nombre, prod.marca, prod.categoria, prod.descripcion];
-  const hay = normalizar(campos.filter(Boolean).join(' '));
-  card.dataset.search = hay;                        // "tetina pigeon 3m ..."
-  card.dataset.searchCompact = hay.replace(/\s/g, ''); // "tetinapigeon3m..."
+    // 👇 NUEVO: índice de búsqueda precalculado
+    const campos = [prod.sku, prod.nombre, prod.marca, prod.categoria, prod.descripcion];
+    const hay = normalizar(campos.filter(Boolean).join(' '));
+    card.dataset.search = hay;                        // "tetina pigeon 3m ..."
+    card.dataset.searchCompact = hay.replace(/\s/g, ''); // "tetinapigeon3m..."
 
-  card.innerHTML = `
+    card.innerHTML = `
     <div class="card-img">
       <img src="${prod.imagen || 'assets/images/placeholder.jpg'}" alt="${prod.nombre || 'Escalera'}">
     </div>
@@ -55,8 +55,8 @@ function renderGrid() {
       <button class="btn small btn-agregar" data-index="${index}">Agregar</button>
     </div>
   `;
-  grid.appendChild(card);
-});
+    grid.appendChild(card);
+  });
 
   // Eventos de los botones "Agregar" (SOLO el producto, sin regalo automático)
   document.querySelectorAll('.btn-agregar').forEach(btn => {
@@ -134,14 +134,26 @@ function toggleRegalo(cartId) {
   renderResumen();
 }
 
-function renderResumen() {
+// Eliminar producto del carrito desde el resumen
+function eliminarDelCarrito(cartId) {
+  state.cart = state.cart.filter(i => i.cartId !== cartId);
+  const nuevoSubtotal = state.cart.reduce((sum, i) => sum + i.precio, 0);
+  state.finalTotal = nuevoSubtotal;
+  actualizarContador();
+
+  if (state.cart.length === 0) {
+    cerrarResumen();
+    return;
+  }
+  renderResumen();
+}
+  function renderResumen() {
   const lines = el("summaryLines");
   if (!lines) return;
   lines.innerHTML = "";
 
   const subtotal = state.cart.reduce((sum, item) => sum + item.precio, 0);
 
-  // Tabla de productos con columna de regalo
   const table = document.createElement("table");
   table.style.width = "100%";
   table.style.borderCollapse = "collapse";
@@ -153,6 +165,7 @@ function renderResumen() {
         <th style="padding:8px; text-align:left; color:var(--muted);">Producto</th>
         <th style="padding:8px; text-align:right; color:var(--muted);">Precio</th>
         <th style="padding:8px; text-align:center; color:var(--muted);">🎁</th>
+        <th style="padding:8px; text-align:center; color:var(--muted);"></th>
       </tr>
     </thead>
     <tbody id="resumenTablaBody"></tbody>
@@ -176,50 +189,50 @@ function renderResumen() {
       <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:center;">
         <button class="btn-regalo-toggle" data-cart-id="${item.cartId}" style="cursor:pointer; font-size:16px; background:none; border:none;" title="Alternar regalo">${item.precio === 0 ? '🎁' : '🎁'}</button>
       </td>
+      <!-- ✅ NUEVO: botón eliminar -->
+      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:center;">
+        <button class="btn-eliminar-item" data-cart-id="${item.cartId}"
+                style="cursor:pointer; font-size:15px; background:none; border:none; color:#ef4444; font-weight:700; transition:transform .15s;"
+                onmouseenter="this.style.transform='scale(1.3)'"
+                onmouseleave="this.style.transform='scale(1)'"
+                title="Eliminar producto">✕</button>
+      </td>
     `;
     tbody.appendChild(row);
   });
 
-  // --- NUEVO: Eventos de los inputs de precio en el resumen ---
   document.querySelectorAll('.resumen-price-input').forEach(input => {
-    // Seleccionar todo al hacer foco (se borra listo para escribir)
-    input.addEventListener('focus', function() {
+    input.addEventListener('focus', function () {
       this.select();
     });
 
-    // Al salir del campo, validar y actualizar estado
-    input.addEventListener('blur', function() {
+    input.addEventListener('blur', function () {
       const val = this.value.trim();
       const cartId = parseInt(this.dataset.cartId);
       const item = state.cart.find(i => i.cartId === cartId);
       if (!item) return;
 
       if (val === '' || isNaN(Number(val))) {
-        // Vacío o inválido → restaurar precio original
         this.value = this.dataset.original;
         item.precio = Number(this.dataset.original);
       } else {
         const nuevoPrecio = Number(val);
         item.precio = nuevoPrecio;
 
-        // Si el precio es >0 y el producto estaba como regalo, quitamos el estado regalo
         if (nuevoPrecio > 0 && item.regaloOriginalPrice !== undefined) {
           delete item.regaloOriginalPrice;
-          // Actualizar visual del botón de regalo (pasa de 🎁 a 🎁 pero lógica consistente)
           const btn = document.querySelector(`.btn-regalo-toggle[data-cart-id="${cartId}"]`);
           if (btn) btn.textContent = '🎁';
         }
       }
 
-      // Recalcular subtotales y actualizar la vista de totales
       const nuevoSubtotal = state.cart.reduce((sum, i) => sum + i.precio, 0);
-      state.finalTotal = nuevoSubtotal;   // reseteamos precio final al nuevo subtotal
+      state.finalTotal = nuevoSubtotal;
       if (el("inputPrecioFinal")) el("inputPrecioFinal").value = nuevoSubtotal;
       if (el("resumenFinal")) el("resumenFinal").textContent = formatPEN(nuevoSubtotal);
     });
 
-    // (Opcional) Actualizar el total en tiempo real mientras se escribe
-    input.addEventListener('input', function() {
+    input.addEventListener('input', function () {
       const tempVal = Number(this.value) || 0;
       const cartId = parseInt(this.dataset.cartId);
       const subtotalTemporal = state.cart.reduce((sum, i) => {
@@ -231,15 +244,21 @@ function renderResumen() {
     });
   });
 
-  // Asignar eventos a los botones de regalo (sin cambios)
   document.querySelectorAll('.btn-regalo-toggle').forEach(btn => {
-    btn.addEventListener('click', function(e) {
+    btn.addEventListener('click', function (e) {
       const cartId = parseInt(this.dataset.cartId);
       toggleRegalo(cartId);
     });
   });
 
-  // Totales (el input de precio final se mantiene sincronizado)
+  // ✅ NUEVO: eventos de eliminación
+  document.querySelectorAll('.btn-eliminar-item').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const cartId = parseInt(this.dataset.cartId);
+      eliminarDelCarrito(cartId);
+    });
+  });
+
   const totalBlock = document.createElement("div");
   totalBlock.className = "summary-totals";
   totalBlock.innerHTML = `
@@ -263,7 +282,6 @@ function renderResumen() {
   `;
   lines.appendChild(totalBlock);
 
-  // Sincronizar input con total final
   const inputFinal = el("inputPrecioFinal");
   if (inputFinal) {
     inputFinal.addEventListener("input", function () {
@@ -382,18 +400,18 @@ function enviarPedido() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   })
-  .then(res => {
-    if (res.ok) {
-      alert('✅ Pedido subido correctamente');
-      cerrarPedidoFinal();
-      vaciarCarrito();
-    } else {
-      alert('❌ Error al enviar el pedido');
-    }
-  })
-  .catch(err => {
-    alert('❌ Error de conexión: ' + err.message);
-  });
+    .then(res => {
+      if (res.ok) {
+        alert('✅ Pedido subido correctamente');
+        cerrarPedidoFinal();
+        vaciarCarrito();
+      } else {
+        alert('❌ Error al enviar el pedido');
+      }
+    })
+    .catch(err => {
+      alert('❌ Error de conexión: ' + err.message);
+    });
 }
 
 // ---------- CARGAR DATOS DESDE n8n (IA) ----------
@@ -497,9 +515,9 @@ function init() {
     vaciarCarrito();
     // Si el modal de resumen está abierto, lo cerramos también para evitar verlo vacío
     if (el("summaryModal") && !el("summaryModal").classList.contains("hidden")) {
-        cerrarResumen();
+      cerrarResumen();
     }
-});
+  });
   el("summaryClose")?.addEventListener("click", cerrarResumen);
   el("pedidoClose")?.addEventListener("click", cerrarPedidoFinal);
   el("btnEnviarPedido")?.addEventListener("click", enviarPedido);
