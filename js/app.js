@@ -34,43 +34,54 @@ function renderGrid() {
     const card = document.createElement("div");
     card.className = "card";
 
-    // 👇 NUEVO: índice de búsqueda precalculado
+    // Índice de búsqueda precalculado
     const campos = [prod.sku, prod.nombre, prod.marca, prod.categoria, prod.descripcion];
     const hay = normalizar(campos.filter(Boolean).join(' '));
-    card.dataset.search = hay;                        // "tetina pigeon 3m ..."
-    card.dataset.searchCompact = hay.replace(/\s/g, ''); // "tetinapigeon3m..."
+    card.dataset.search = hay;
+    card.dataset.searchCompact = hay.replace(/\s/g, '');
+
+    const sinStock = (Number(prod.stock) || 0) <= 0;
+    if (sinStock) card.classList.add("agotado");
 
     card.innerHTML = `
     <div class="card-img">
-      <img src="${prod.imagen || 'assets/images/placeholder.jpg'}" alt="${prod.nombre || 'Escalera'}">
+      <img src="${prod.imagen || 'assets/images/placeholder.jpg'}" alt="${prod.nombre || 'Producto'}">
+      ${sinStock ? '<span class="badge-agotado">Agotado</span>' : ''}
     </div>
     <div class="card-body">
-      <div class="card-name">${prod.nombre || 'Escalera'}</div>
+      <div class="card-name">${prod.nombre || 'Producto'}</div>
       <div class="card-meta">
         <span class="sku-display">${prod.sku || ''}</span>
         <div class="price">${formatPEN(prod.precio)}</div>
       </div>
+      <div class="card-stock" style="font-size:11px;font-weight:700;margin-top:4px;color:${sinStock ? '#ef4444' : (prod.stock > 5 ? '#22c55e' : '#f59e0b')};">
+        ${sinStock ? '🚫 Agotado' : '📦 Stock: ' + prod.stock}
+      </div>
     </div>
     <div class="card-actions">
-      <button class="btn small btn-agregar" data-index="${index}">Agregar</button>
+      <button class="btn small btn-agregar" data-index="${index}" ${sinStock ? 'disabled' : ''}
+        style="${sinStock ? 'opacity:.5;cursor:not-allowed;' : ''}">
+        ${sinStock ? 'Sin stock' : 'Agregar'}
+      </button>
     </div>
   `;
     grid.appendChild(card);
   });
 
-  // Eventos de los botones "Agregar" (SOLO el producto, sin regalo automático)
+  // Eventos de los botones "Agregar" (solo los habilitados)
   document.querySelectorAll('.btn-agregar').forEach(btn => {
     btn.addEventListener('click', function (e) {
+      if (this.disabled) return;                    // seguridad extra
       const index = parseInt(this.dataset.index);
       const prod = productos[index];
 
       state.cart.push({
         cartId: ++state.cartSeq,
         sku: prod.sku,
-        nombre: prod.nombre || 'Escalera',
+        nombre: prod.nombre || 'Producto',
         precio: Number(prod.precio) || 0,
-        originalPrice: Number(prod.precio) || 0,   // 👈 esto es nuevo
-        type: 'escalera'
+        originalPrice: Number(prod.precio) || 0,
+        type: 'producto'
       });
 
       actualizarContador();

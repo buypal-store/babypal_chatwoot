@@ -24,10 +24,9 @@ async function cargarProductos() {
         imagen:    `imagenes/${f[COL.sku].trim()}.jpeg`,
       }))
       .filter(p =>
-        p.rubro.toUpperCase() === RUBRO_TIENDA &&  // solo Strenko
-        p.nombre &&
-        p.stock > 0
-      );
+          p.rubro.toUpperCase() === RUBRO_TIENDA &&
+          p.nombre
+        )
 
     // ← LA CLAVE: re-inyecta los productos custom y VUELVE a pintar la grilla
     if (typeof cargarProductosCustom === "function") cargarProductosCustom();

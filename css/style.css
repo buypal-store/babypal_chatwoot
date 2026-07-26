@@ -500,6 +500,16 @@ select.campo-pedido option {
   box-sizing: border-box;
   /* … el resto de tus propiedades … */
 }
+.card-img { position: relative; }
+.badge-agotado {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: #ef4444; color: #fff;
+  font-size: 10px; font-weight: 800;
+  padding: 3px 8px; border-radius: 999px;
+  letter-spacing: .3px; text-transform: uppercase;
+}
+.card.agotado .card-img img { filter: grayscale(.6); opacity: .75; }
 /* Ajustes para pantallas muy pequeñas */
 @media (max-width: 400px) {
   .grid {
