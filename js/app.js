@@ -40,7 +40,8 @@ function renderGrid() {
     card.dataset.search = hay;
     card.dataset.searchCompact = hay.replace(/\s/g, '');
 
-    const sinStock = (Number(prod.stock) || 0) <= 0;
+    //const sinStock = (Number(prod.stock) || 0) <= 0;
+     const sinStock = false;
     if (sinStock) card.classList.add("agotado");
 
     card.innerHTML = `
