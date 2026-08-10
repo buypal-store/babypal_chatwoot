@@ -1,7 +1,15 @@
-// === Catálogo Strenko — se alimenta solo desde el Google Sheet ===
+
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_TGbgo-sVm6R7EMGGVAkrztMQ6RxtqAb-9YYJj5lTBlNMG-SU9lseA9a7bT_d8sWTvo0-fXV4xlUH/pub?gid=642137454&single=true&output=csv";
 
 const RUBRO_TIENDA = "BABYPAL";   // esta es la tienda de este repo
+
+// 👇 ACÁ PODÉS PONER LAS IMÁGENES MANUALES (SKU: ruta de la imagen)
+const IMAGENES_MANUALES = {
+   "COMBO-BAÑERA-PLEGABLE-BEBE-AZUL" : "imagenes/combo-bano.jpg",
+   "COMBO-BAÑERA-PLEGABLE-BEBE-ROSA" : "imagenes/combo-bano.jpg",
+   "COMBO-BAÑERA-PLEGABLE-BEBE-FUCSIA" : "imagenes/combo-bano.jpg",
+   "COMBO-BAÑERA-PLEGABLE-BEBE-GRIS" : "imagenes/combo-bano.jpg"
+};
 
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
 const COL = { sku: 0, nombre: 1, categoria: 2, precio: 3, stock: 4, rubro: 5 };
@@ -26,7 +34,14 @@ async function cargarProductos() {
       .filter(p =>
           p.rubro.toUpperCase() === RUBRO_TIENDA &&
           p.nombre
-        )
+      );
+
+    // 🔁 Acá se reemplazan las imágenes si el SKU está en IMAGENES_MANUALES
+    window.productosData.forEach(prod => {
+      if (IMAGENES_MANUALES[prod.sku]) {
+        prod.imagen = IMAGENES_MANUALES[prod.sku];
+      }
+    });
 
     // ← LA CLAVE: re-inyecta los productos custom y VUELVE a pintar la grilla
     if (typeof cargarProductosCustom === "function") cargarProductosCustom();
