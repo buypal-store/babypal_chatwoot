@@ -11,6 +11,7 @@ const IMAGENES_MANUALES = {
    "COMBO-BAÑERA-PLEGABLE-BEBE-GRIS" : "imagenes/combo-bano.jpg",
    "COMBO-PARANTE-BAÑERA-AZUL": "imagenes/combo-parante-banera-azul.jpeg",
    "COMBO-PARANTE-BAÑERA-ROSADO": "imagenes/combo-parante-banera-rosado.jpeg",
+   "PIGEON-TETINA-SS (0+)": "imagenes/pigeon-tetina-ss-0.jpeg",
 };
 
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
