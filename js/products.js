@@ -8,7 +8,8 @@ const IMAGENES_MANUALES = {
    "COMBO-BAÑERA-PLEGABLE-BEBE-AZUL" : "imagenes/combo-bano.jpg",
    "COMBO-BAÑERA-PLEGABLE-BEBE-ROSA" : "imagenes/combo-bano.jpg",
    "COMBO-BAÑERA-PLEGABLE-BEBE-FUCSIA" : "imagenes/combo-bano.jpg",
-   "COMBO-BAÑERA-PLEGABLE-BEBE-GRIS" : "imagenes/combo-bano.jpg"
+   "COMBO-BAÑERA-PLEGABLE-BEBE-GRIS" : "imagenes/combo-bano.jpg",
+   "COMBO-PARANTE-BAÑERA-AZUL": "imagenes/combo-parante-banera-azul.jpeg",
 };
 
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
