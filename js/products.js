@@ -12,6 +12,7 @@ const IMAGENES_MANUALES = {
    "COMBO-PARANTE-BAÑERA-AZUL": "imagenes/combo-parante-banera-azul.jpeg",
    "COMBO-PARANTE-BAÑERA-ROSADO": "imagenes/combo-parante-banera-rosado.jpeg",
    "PIGEON-TETINA-SS (0+)": "imagenes/pigeon-tetina-ss-0.jpeg",
+   "PIGEON-TETINA-S (+1)": "imagenes/pigeon-tetina-s-1.jpeg",
 };
 
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
