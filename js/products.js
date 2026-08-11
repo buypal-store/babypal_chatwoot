@@ -24,6 +24,7 @@ const IMAGENES_MANUALES = {
    "COMBO-BAÑERA-PLEGABLE-BEBE-FUCSIA": "imagenes/combo-banera-plegable-bebe-fucsia.jpeg",
    "COMBO-BAÑERA-PLEGABLE-BEBE-AZUL": "imagenes/combo-banera-plegable-bebe-azul.jpeg",
    "COMBO-BAÑERA-PLEGABLE-BEBE-GRIS": "imagenes/combo-banera-plegable-bebe-gris.jpeg",
+   "RANGER DUAL LENS - 5MP": "imagenes/ranger-dual-lens-5mp.jpeg",
 };
 
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
