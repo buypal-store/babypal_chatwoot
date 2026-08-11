@@ -18,6 +18,7 @@ const IMAGENES_MANUALES = {
    "PIGEON-TETINA-LL (+9)": "imagenes/pigeon-tetina-ll-9.jpeg",
    "PIGEON-TETINA-LLL (+15)": "imagenes/pigeon-tetina-lll-15.jpeg",
    "BAÑERA-PLEGABLE-BEBE-AZUL": "imagenes/banera-plegable-bebe-azul.jpeg",
+   "BAÑERA-PLEGABLE-BEBE-ROSADO": "imagenes/banera-plegable-bebe-rosado.jpeg",
 };
 
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
