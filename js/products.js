@@ -16,6 +16,7 @@ const IMAGENES_MANUALES = {
    "PIGEON-TETINA-M (+3)": "imagenes/pigeon-tetina-m-3.jpeg",
    "PIGEON-TETINA-L (+6)": "imagenes/pigeon-tetina-l-6.jpeg",
    "PIGEON-TETINA-LL (+9)": "imagenes/pigeon-tetina-ll-9.jpeg",
+   "PIGEON-TETINA-LLL (+15)": "imagenes/pigeon-tetina-lll-15.jpeg",
 };
 
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
