@@ -612,8 +612,27 @@ function guardarNuevoProducto() {
   el("nuevoPrecio").value = "";
   el("nuevoSKU").focus();
 }
+
+// ---------- PURGA DE PRODUCTOS PERSONALIZADOS ----------
+// Sube esta fecha cada vez que quieras forzar una limpieza nueva.
+const PURGA_CUSTOM = "2026-09-04";
+
+function purgarProductosCustom() {
+  try {
+    if (localStorage.getItem("customPurgeVersion") === PURGA_CUSTOM) return;
+    Object.keys(localStorage)
+      .filter(k => k.indexOf("customProducts_") === 0)
+      .forEach(k => localStorage.removeItem(k));
+    localStorage.setItem("customPurgeVersion", PURGA_CUSTOM);
+    console.log("[catalogo] productos personalizados purgados:", PURGA_CUSTOM);
+  } catch (e) {
+    console.warn("[catalogo] no se pudo purgar:", e);
+  }
+}
+
 // ---------- INICIALIZACIÓN ----------
 function init() {
+  purgarProductosCustom();   // ← nueva, va primero
   cargarProductosCustom();
   renderGrid();
   bindSearch();
