@@ -3,6 +3,7 @@
    (sin guante automático, con botón regalo manual)
    ========================================== */
 
+
 const state = {
   cart: [],
   cartSeq: 0,
