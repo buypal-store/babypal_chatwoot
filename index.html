@@ -46,11 +46,8 @@
       <div id="summaryLines" class="summary-lines"></div>
       <!-- Bloque estático ELIMINADO para evitar duplicado con lo que genera app.js -->
     </div>
-    <div style="margin-top:16px; display:flex; gap:8px;">
-      <button id="btnCopiarResumen" class="btn big" style="flex:0 0 auto; background:#3b82f6; color:#fff; font-weight:900;">
-        📷 Copiar imagen
-      </button>
-      <button id="btnIrPedidoFinal" class="btn big" style="flex:1; background:#22c55e; color:#000; font-weight:900;">
+    <div style="margin-top:16px;">
+      <button id="btnIrPedidoFinal" class="btn big" style="width:100%; background:#22c55e; color:#000; font-weight:900;">
         📋 Continuar con el pedido
       </button>
     </div>
@@ -62,10 +59,13 @@
       <div class="modal-card summary-card" style="max-width:700px !important;">
         <button id="pedidoClose" class="modal-close">✕</button>
         <div class="summary-body">
-          <div class="summary-title">🧾 Resumen de Pedido</div>
+          <div class="summary-title">🧾 Resumen de Pedido
+            <button id="btnCopiarTabla" title="Copiar como imagen para WhatsApp"
+              style="float:right; margin-right:44px; background:#3b82f6; color:#fff; border:none; border-radius:8px; width:32px; height:32px; cursor:pointer; font-size:16px; line-height:1; padding:0;">📷</button>
+          </div>
 
           <!-- Tabla SKU + Producto + Precio -->
-          <div style="overflow-x:auto; margin-bottom:12px;">
+          <div id="tablaPedidoCaptura" style="overflow-x:auto; margin-bottom:12px;">
             <table id="tablaPedido" style="width:100%; border-collapse:collapse; font-size:12px;">
               <thead>
                 <tr style="border-bottom:2px solid rgba(255,255,255,.2);">

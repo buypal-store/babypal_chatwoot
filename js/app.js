@@ -415,34 +415,40 @@ function eliminarDelCarrito(cartId) {
   }
 }
 
-// ---------- COPIAR RESUMEN COMO IMAGEN (para WhatsApp) ----------
+// ---------- COPIAR MINI TABLA COMO IMAGEN (para WhatsApp) ----------
 async function copiarResumenComoImagen() {
-  const zona = el("summaryLines");
-  const btn = el("btnCopiarResumen");
+  const zona = el("tablaPedidoCaptura");
+  const btn = el("btnCopiarTabla");
   if (!zona || typeof html2canvas === 'undefined') {
     alert('⚠️ La función de captura no está disponible');
     return;
   }
-  const textoOriginal = btn ? btn.textContent : '';
-  if (btn) btn.textContent = '⏳ Generando...';
+  // Fondo real del modal (tema oscuro): sin esto el texto blanco sería invisible
+  const card = document.querySelector('#pedidoModal .modal-card');
+  let bg = card ? getComputedStyle(card).backgroundColor : '';
+  if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') bg = '#111827';
+
+  const iconoOriginal = btn ? btn.textContent : '';
+  if (btn) btn.textContent = '⏳';
   try {
-    const canvas = await html2canvas(zona, { backgroundColor: '#ffffff', scale: 2 });
+    const canvas = await html2canvas(zona, { backgroundColor: bg, scale: 2 });
+    // El portapapeles solo acepta PNG para imágenes
     const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
     try {
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      if (btn) btn.textContent = '✅ Copiado, pégalo en WhatsApp';
+      if (btn) btn.textContent = '✅';
     } catch (e) {
-      // El portapapeles falló (permiso/navegador): se descarga el PNG
+      // Portapapeles bloqueado (p. ej. iframe de Chatwoot sin permiso): descarga JPG
       const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = 'resumen-pedido.png';
+      a.href = canvas.toDataURL('image/jpeg', 0.92);
+      a.download = 'resumen-pedido.jpg';
       a.click();
-      if (btn) btn.textContent = '📥 Imagen descargada';
+      if (btn) btn.textContent = '📥';
     }
   } catch (e) {
     alert('❌ No se pudo generar la imagen: ' + e.message);
   }
-  if (btn) setTimeout(() => { btn.textContent = textoOriginal; }, 2500);
+  if (btn) setTimeout(() => { btn.textContent = iconoOriginal; }, 2000);
 }
 
 // ---------- MODAL PEDIDO FINAL ----------
@@ -491,7 +497,20 @@ function renderTablaPedidoFinal() {
   const subtotal = subtotalCarrito();
   const totalFinal = state.finalTotal || subtotal;
 
-  if (el("tablaPedidoTotal")) el("tablaPedidoTotal").textContent = formatPEN(totalFinal);
+  // Fila ENVIO (solo si hay monto de envío); el TOTAL mostrado lo incluye,
+  // pero MONTO sigue siendo solo productos (el envío viaja en su propio campo)
+  const envio = envioCliente();
+  if (envio > 0) {
+    const rowEnvio = document.createElement("tr");
+    rowEnvio.innerHTML = `
+      <td></td>
+      <td style="font-weight:700;">🛵 ENVIO</td>
+      <td style="text-align:right; font-weight:700;">${formatPEN(envio)}</td>
+    `;
+    tbody.appendChild(rowEnvio);
+  }
+
+  if (el("tablaPedidoTotal")) el("tablaPedidoTotal").textContent = formatPEN(totalFinal + envio);
   if (el("campoMonto")) el("campoMonto").value = totalFinal;
 }
 
@@ -794,7 +813,12 @@ function init() {
     }
   });
   el("summaryClose")?.addEventListener("click", cerrarResumen);
-  el("btnCopiarResumen")?.addEventListener("click", copiarResumenComoImagen);
+  el("btnCopiarTabla")?.addEventListener("click", copiarResumenComoImagen);
+
+  // La fila ENVIO de la mini tabla se refresca mientras se escribe el monto
+  el("campoEnvioCliente")?.addEventListener("input", () => {
+    if (state.cart.length > 0) renderTablaPedidoFinal();
+  });
   el("pedidoClose")?.addEventListener("click", cerrarPedidoFinal);
   el("btnEnviarPedido")?.addEventListener("click", enviarPedido);
 
