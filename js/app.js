@@ -231,12 +231,12 @@ function eliminarDelCarrito(cartId) {
   table.innerHTML = `
     <thead>
       <tr style="border-bottom:2px solid var(--border);">
-        <th style="padding:8px; text-align:left; color:var(--muted);">SKU</th>
-        <th style="padding:8px; text-align:left; color:var(--muted);">Producto</th>
-        <th style="padding:8px; text-align:center; color:var(--muted);">Cant.</th>
-        <th style="padding:8px; text-align:right; color:var(--muted);">Precio unit.</th>
-        <th style="padding:8px; text-align:center; color:var(--muted);">🎁</th>
-        <th style="padding:8px; text-align:center; color:var(--muted);"></th>
+        <th style="padding:6px 3px; text-align:left; color:var(--muted);">SKU</th>
+        <th style="padding:6px 3px; text-align:left; color:var(--muted);">Producto</th>
+        <th style="padding:6px 3px; text-align:center; color:var(--muted);">Cant.</th>
+        <th style="padding:6px 3px; text-align:right; color:var(--muted);">P. unit.</th>
+        <th style="padding:6px 2px; text-align:center; color:var(--muted);">🎁</th>
+        <th style="padding:6px 2px; text-align:center; color:var(--muted);"></th>
       </tr>
     </thead>
     <tbody id="resumenTablaBody"></tbody>
@@ -247,31 +247,30 @@ function eliminarDelCarrito(cartId) {
   state.cart.forEach(item => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td style="padding:6px 8px; border-bottom:1px solid var(--border); font-size:11px; color:var(--muted);">${item.sku}</td>
-      <td style="padding:6px 8px; border-bottom:1px solid var(--border);">${item.nombre}</td>
-      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:center;">
+      <td style="padding:6px 3px; border-bottom:1px solid var(--border); font-size:10px; color:var(--muted); word-break:break-all;">${item.sku}</td>
+      <td style="padding:6px 3px; border-bottom:1px solid var(--border);">${item.nombre}</td>
+      <td style="padding:6px 3px; border-bottom:1px solid var(--border); text-align:center;">
         <input type="number"
                class="resumen-qty-input"
                value="${cantidadDe(item)}"
                min="1" max="${CANTIDAD_MAX}" step="1"
                data-cart-id="${item.cartId}"
-               style="width:60px; text-align:center; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 6px; background:#fff;" />
+               style="width:44px; text-align:center; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 2px; background:#fff;" />
       </td>
-      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:right; font-weight:700;">
+      <td style="padding:6px 3px; border-bottom:1px solid var(--border); text-align:right; font-weight:700;">
         <input type="number"
                class="resumen-price-input"
                value="${item.precio}"
                data-original="${item.originalPrice ?? item.precio}"
                data-cart-id="${item.cartId}"
-               style="width:90px; text-align:right; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 8px; background:#fff;" />
+               style="width:58px; text-align:right; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 4px; background:#fff;" />
       </td>
-      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:center;">
-        <button class="btn-regalo-toggle" data-cart-id="${item.cartId}" style="cursor:pointer; font-size:16px; background:none; border:none;" title="Alternar regalo">${item.precio === 0 ? '🎁' : '🎁'}</button>
+      <td style="padding:6px 2px; border-bottom:1px solid var(--border); text-align:center;">
+        <button class="btn-regalo-toggle" data-cart-id="${item.cartId}" style="cursor:pointer; font-size:15px; background:none; border:none; padding:0;" title="Alternar regalo">${item.precio === 0 ? '🎁' : '🎁'}</button>
       </td>
-      <!-- ✅ NUEVO: botón eliminar -->
-      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:center;">
+      <td style="padding:6px 2px; border-bottom:1px solid var(--border); text-align:center;">
         <button class="btn-eliminar-item" data-cart-id="${item.cartId}"
-                style="cursor:pointer; font-size:15px; background:none; border:none; color:#ef4444; font-weight:700; transition:transform .15s;"
+                style="cursor:pointer; font-size:14px; background:none; border:none; color:#ef4444; font-weight:700; transition:transform .15s; padding:0;"
                 onmouseenter="this.style.transform='scale(1.3)'"
                 onmouseleave="this.style.transform='scale(1)'"
                 title="Eliminar producto">✕</button>
@@ -413,52 +412,6 @@ function eliminarDelCarrito(cartId) {
       abrirPedidoFinal();
     };
   }
-}
-
-// ---------- COPIAR MINI TABLA COMO IMAGEN (para WhatsApp) ----------
-async function copiarResumenComoImagen() {
-  const zona = el("tablaPedidoCaptura");
-  const btn = el("btnCopiarTabla");
-  if (!zona || typeof html2canvas === 'undefined') {
-    alert('⚠️ La función de captura no está disponible');
-    return;
-  }
-  // Fondo real del modal (tema oscuro): sin esto el texto blanco sería invisible
-  const card = document.querySelector('#pedidoModal .modal-card');
-  let bg = card ? getComputedStyle(card).backgroundColor : '';
-  if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') bg = '#111827';
-
-  const iconoOriginal = btn ? btn.textContent : '';
-  if (btn) btn.textContent = '⏳';
-
-  let ultimoCanvas = null;
-  const generarBlob = async () => {
-    ultimoCanvas = await html2canvas(zona, { backgroundColor: bg, scale: 2 });
-    // El portapapeles solo acepta PNG para imágenes
-    return await new Promise(res => ultimoCanvas.toBlob(res, 'image/png'));
-  };
-
-  try {
-    // El ClipboardItem se crea con una PROMESA dentro del mismo clic:
-    // si se espera primero a html2canvas, la "activación de usuario"
-    // expira y el navegador rechaza la escritura al portapapeles.
-    const item = new ClipboardItem({ 'image/png': generarBlob() });
-    await navigator.clipboard.write([item]);
-    if (btn) btn.textContent = '✅';
-  } catch (e) {
-    // Portapapeles bloqueado (p. ej. iframe de Chatwoot sin permiso): descarga JPG
-    try {
-      if (!ultimoCanvas) await generarBlob();
-      const a = document.createElement('a');
-      a.href = ultimoCanvas.toDataURL('image/jpeg', 0.92);
-      a.download = 'resumen-pedido.jpg';
-      a.click();
-      if (btn) btn.textContent = '📥';
-    } catch (e2) {
-      alert('❌ No se pudo generar la imagen: ' + e2.message);
-    }
-  }
-  if (btn) setTimeout(() => { btn.textContent = iconoOriginal; }, 2000);
 }
 
 // ---------- COPIAR RESUMEN EN TEXTO PARA WHATSAPP (de cara al cliente) ----------
@@ -888,7 +841,6 @@ function init() {
     }
   });
   el("summaryClose")?.addEventListener("click", cerrarResumen);
-  el("btnCopiarTabla")?.addEventListener("click", copiarResumenComoImagen);
   el("btnCopiarTexto")?.addEventListener("click", copiarTextoWhatsApp);
 
   // La fila ENVIO de la mini tabla se refresca mientras se escribe el monto
