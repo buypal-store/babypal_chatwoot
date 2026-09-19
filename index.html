@@ -46,8 +46,11 @@
       <div id="summaryLines" class="summary-lines"></div>
       <!-- Bloque estático ELIMINADO para evitar duplicado con lo que genera app.js -->
     </div>
-    <div style="margin-top:16px;">
-      <button id="btnIrPedidoFinal" class="btn big" style="width:100%; background:#22c55e; color:#000; font-weight:900;">
+    <div style="margin-top:16px; display:flex; gap:8px;">
+      <button id="btnCopiarResumen" class="btn big" style="flex:0 0 auto; background:#3b82f6; color:#fff; font-weight:900;">
+        📷 Copiar imagen
+      </button>
+      <button id="btnIrPedidoFinal" class="btn big" style="flex:1; background:#22c55e; color:#000; font-weight:900;">
         📋 Continuar con el pedido
       </button>
     </div>
@@ -120,6 +123,7 @@
                 <option value="">-</option>
                 <option value="Boleta">Boleta</option>
                 <option value="Factura">Factura</option>
+                <option value="No boletear">No boletear</option>
               </select>
               <label style="margin-top:6px;">Observación</label>
               <input id="campoObservacion" class="campo-pedido" placeholder="-" autocomplete="off">
@@ -186,6 +190,7 @@
     </div>
   </main>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="js/products.js"></script>
   <script>window.catalogoId = "bebes";</script>
   <script src="js/app.js"></script>

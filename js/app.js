@@ -61,6 +61,9 @@ function renderGrid() {
       </div>
     </div>
     <div class="card-actions">
+      <input type="number" class="qty-input" value="1" min="1" max="500" step="1" ${sinStock ? 'disabled' : ''}
+        title="Cantidad"
+        style="width:54px; text-align:center; font-weight:700; border:1px solid var(--border); border-radius:8px; padding:6px 4px; background:#fff;">
       <button class="btn small btn-agregar" data-index="${index}" ${sinStock ? 'disabled' : ''}
         style="${sinStock ? 'opacity:.5;cursor:not-allowed;' : ''}">
         ${sinStock ? 'Sin stock' : 'Agregar'}
@@ -77,14 +80,24 @@ function renderGrid() {
       const index = parseInt(this.dataset.index);
       const prod = productos[index];
 
+      const qtyInput = this.closest('.card-actions')?.querySelector('.qty-input');
+      const cantidad = validarCantidad(qtyInput?.value, prod.nombre);
+      if (cantidad === null) return;
+      if (qtyInput) qtyInput.value = 1;
+
       state.cart.push({
         cartId: ++state.cartSeq,
         sku: prod.sku,
         nombre: prod.nombre || 'Producto',
         precio: Number(prod.precio) || 0,
         originalPrice: Number(prod.precio) || 0,
+        cantidad: cantidad,
         type: 'producto'
       });
+
+      // El carrito cambió: se descarta cualquier "Precio final" manual anterior
+      // para que nunca se envíe un total desactualizado (menor al real).
+      state.finalTotal = 0;
 
       actualizarContador();
       this.textContent = '✓ Agregado';
@@ -93,11 +106,55 @@ function renderGrid() {
   });
 }
 
+// ---------- CANTIDAD: helpers ----------
+// La cantidad SOLO vive en la interfaz: al enviar, cada línea se expande en
+// N objetos repetidos, así el payload a n8n es idéntico al de N clics.
+const CANTIDAD_MAX = 500;
+const CANTIDAD_CONFIRMAR = 50;
+
+function validarCantidad(valor, nombreProducto) {
+  let c = Math.round(Number(valor));
+  if (!c || c < 1) c = 1;
+  if (c > CANTIDAD_MAX) {
+    alert(`⚠️ Máximo ${CANTIDAD_MAX} unidades por línea`);
+    return null;
+  }
+  if (c >= CANTIDAD_CONFIRMAR) {
+    if (!confirm(`¿Confirmas ${c} unidades de "${nombreProducto || 'este producto'}"?`)) return null;
+  }
+  return c;
+}
+
+function cantidadDe(item) {
+  return Math.max(1, Math.round(Number(item.cantidad) || 1));
+}
+
+function subtotalCarrito() {
+  return state.cart.reduce((sum, i) => sum + i.precio * cantidadDe(i), 0);
+}
+
+function envioCliente() {
+  return Math.round(Number(el("campoEnvioCliente")?.value) || 0);
+}
+
+// Mantiene sincronizados Subtotal, TOTAL FINAL y las filas de envío del resumen
+function pintarTotalesResumen(subtotalActual, totalProductos) {
+  if (el("resumenSubtotal")) el("resumenSubtotal").textContent = formatPEN(subtotalActual);
+  if (el("resumenFinal")) el("resumenFinal").textContent = formatPEN(totalProductos);
+  const envio = envioCliente();
+  const filaEnvio = el("resumenFilaEnvio");
+  const filaTotalEnvio = el("resumenFilaTotalEnvio");
+  if (filaEnvio) filaEnvio.style.display = envio > 0 ? '' : 'none';
+  if (filaTotalEnvio) filaTotalEnvio.style.display = envio > 0 ? '' : 'none';
+  if (el("resumenEnvio")) el("resumenEnvio").textContent = formatPEN(envio);
+  if (el("resumenTotalConEnvio")) el("resumenTotalConEnvio").textContent = formatPEN(totalProductos + envio);
+}
+
 // ---------- CONTADOR DEL CARRITO ----------
 function actualizarContador() {
   const contador = el("contadorCarrito");
   if (!contador) return;
-  const total = state.cart.length;
+  const total = state.cart.reduce((sum, i) => sum + cantidadDe(i), 0);
   contador.textContent = total;
   contador.style.display = total === 0 ? 'none' : 'inline-flex';
 }
@@ -140,7 +197,7 @@ function toggleRegalo(cartId) {
   }
 
   // Resetear el precio final al nuevo subtotal
-  const nuevoSubtotal = state.cart.reduce((sum, i) => sum + i.precio, 0);
+  const nuevoSubtotal = subtotalCarrito();
   state.finalTotal = nuevoSubtotal;
 
   // Re-renderizar el resumen con los cambios
@@ -150,7 +207,7 @@ function toggleRegalo(cartId) {
 // Eliminar producto del carrito desde el resumen
 function eliminarDelCarrito(cartId) {
   state.cart = state.cart.filter(i => i.cartId !== cartId);
-  const nuevoSubtotal = state.cart.reduce((sum, i) => sum + i.precio, 0);
+  const nuevoSubtotal = subtotalCarrito();
   state.finalTotal = nuevoSubtotal;
   actualizarContador();
 
@@ -165,7 +222,7 @@ function eliminarDelCarrito(cartId) {
   if (!lines) return;
   lines.innerHTML = "";
 
-  const subtotal = state.cart.reduce((sum, item) => sum + item.precio, 0);
+  const subtotal = subtotalCarrito();
 
   const table = document.createElement("table");
   table.style.width = "100%";
@@ -176,7 +233,8 @@ function eliminarDelCarrito(cartId) {
       <tr style="border-bottom:2px solid var(--border);">
         <th style="padding:8px; text-align:left; color:var(--muted);">SKU</th>
         <th style="padding:8px; text-align:left; color:var(--muted);">Producto</th>
-        <th style="padding:8px; text-align:right; color:var(--muted);">Precio</th>
+        <th style="padding:8px; text-align:center; color:var(--muted);">Cant.</th>
+        <th style="padding:8px; text-align:right; color:var(--muted);">Precio unit.</th>
         <th style="padding:8px; text-align:center; color:var(--muted);">🎁</th>
         <th style="padding:8px; text-align:center; color:var(--muted);"></th>
       </tr>
@@ -191,6 +249,14 @@ function eliminarDelCarrito(cartId) {
     row.innerHTML = `
       <td style="padding:6px 8px; border-bottom:1px solid var(--border); font-size:11px; color:var(--muted);">${item.sku}</td>
       <td style="padding:6px 8px; border-bottom:1px solid var(--border);">${item.nombre}</td>
+      <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:center;">
+        <input type="number"
+               class="resumen-qty-input"
+               value="${cantidadDe(item)}"
+               min="1" max="${CANTIDAD_MAX}" step="1"
+               data-cart-id="${item.cartId}"
+               style="width:60px; text-align:center; font-weight:700; border:1px solid var(--border); border-radius:6px; padding:4px 6px; background:#fff;" />
+      </td>
       <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:right; font-weight:700;">
         <input type="number"
                class="resumen-price-input"
@@ -239,21 +305,48 @@ function eliminarDelCarrito(cartId) {
         }
       }
 
-      const nuevoSubtotal = state.cart.reduce((sum, i) => sum + i.precio, 0);
+      const nuevoSubtotal = subtotalCarrito();
       state.finalTotal = nuevoSubtotal;
       if (el("inputPrecioFinal")) el("inputPrecioFinal").value = nuevoSubtotal;
-      if (el("resumenFinal")) el("resumenFinal").textContent = formatPEN(nuevoSubtotal);
+      pintarTotalesResumen(nuevoSubtotal, nuevoSubtotal);
     });
 
     input.addEventListener('input', function () {
       const tempVal = Number(this.value) || 0;
       const cartId = parseInt(this.dataset.cartId);
       const subtotalTemporal = state.cart.reduce((sum, i) => {
-        if (i.cartId === cartId) return sum + tempVal;
-        return sum + i.precio;
+        if (i.cartId === cartId) return sum + tempVal * cantidadDe(i);
+        return sum + i.precio * cantidadDe(i);
       }, 0);
-      if (el("resumenFinal")) el("resumenFinal").textContent = formatPEN(subtotalTemporal);
+      pintarTotalesResumen(subtotalTemporal, subtotalTemporal);
       if (el("inputPrecioFinal")) el("inputPrecioFinal").value = subtotalTemporal;
+    });
+  });
+
+  // Cantidad por línea en el resumen
+  document.querySelectorAll('.resumen-qty-input').forEach(input => {
+    input.addEventListener('focus', function () {
+      this.select();
+    });
+
+    input.addEventListener('blur', function () {
+      const cartId = parseInt(this.dataset.cartId);
+      const item = state.cart.find(i => i.cartId === cartId);
+      if (!item) return;
+
+      const nueva = validarCantidad(this.value, item.nombre);
+      if (nueva === null) {
+        this.value = cantidadDe(item);   // se mantiene la cantidad anterior
+      } else {
+        item.cantidad = nueva;
+        this.value = nueva;
+      }
+
+      const nuevoSubtotal = subtotalCarrito();
+      state.finalTotal = nuevoSubtotal;
+      if (el("inputPrecioFinal")) el("inputPrecioFinal").value = nuevoSubtotal;
+      pintarTotalesResumen(nuevoSubtotal, nuevoSubtotal);
+      actualizarContador();
     });
   });
 
@@ -277,11 +370,11 @@ function eliminarDelCarrito(cartId) {
   totalBlock.innerHTML = `
     <div class="row discount" style="justify-content: space-between; margin-bottom: 12px;">
       <span style="font-weight:600;">Subtotal</span>
-      <span style="font-weight:700;">${formatPEN(subtotal)}</span>
+      <span id="resumenSubtotal" style="font-weight:700;">${formatPEN(subtotal)}</span>
     </div>
     <div class="row discount" style="align-items: center; margin-bottom: 12px;">
       <span style="font-weight:600;">Precio final</span>
-      <input type="number" id="inputPrecioFinal" class="campo-pedido" 
+      <input type="number" id="inputPrecioFinal" class="campo-pedido"
              value="${state.finalTotal || subtotal}" step="1" min="0"
              style="width:120px; text-align:right; font-weight:700;">
     </div>
@@ -292,17 +385,24 @@ function eliminarDelCarrito(cartId) {
         ${formatPEN(state.finalTotal || subtotal)}
       </span>
     </div>
+    <div class="row discount" id="resumenFilaEnvio" style="justify-content: space-between; margin-top: 10px; display:none;">
+      <span style="font-weight:600;">🛵 Envío a cliente</span>
+      <span id="resumenEnvio" style="font-weight:700;"></span>
+    </div>
+    <div class="row final" id="resumenFilaTotalEnvio" style="justify-content: space-between; display:none;">
+      <span style="font-weight:800;">TOTAL + ENVÍO</span>
+      <span id="resumenTotalConEnvio" style="color:var(--accent); font-weight:900; font-size:20px;"></span>
+    </div>
   `;
   lines.appendChild(totalBlock);
+  pintarTotalesResumen(subtotal, state.finalTotal || subtotal);
 
   const inputFinal = el("inputPrecioFinal");
   if (inputFinal) {
     inputFinal.addEventListener("input", function () {
       const val = Math.round(Number(this.value) || 0);
       state.finalTotal = val;
-      if (el("resumenFinal")) {
-        el("resumenFinal").textContent = formatPEN(val);
-      }
+      pintarTotalesResumen(subtotalCarrito(), val);
     });
   }
 
@@ -315,13 +415,43 @@ function eliminarDelCarrito(cartId) {
   }
 }
 
+// ---------- COPIAR RESUMEN COMO IMAGEN (para WhatsApp) ----------
+async function copiarResumenComoImagen() {
+  const zona = el("summaryLines");
+  const btn = el("btnCopiarResumen");
+  if (!zona || typeof html2canvas === 'undefined') {
+    alert('⚠️ La función de captura no está disponible');
+    return;
+  }
+  const textoOriginal = btn ? btn.textContent : '';
+  if (btn) btn.textContent = '⏳ Generando...';
+  try {
+    const canvas = await html2canvas(zona, { backgroundColor: '#ffffff', scale: 2 });
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      if (btn) btn.textContent = '✅ Copiado, pégalo en WhatsApp';
+    } catch (e) {
+      // El portapapeles falló (permiso/navegador): se descarga el PNG
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'resumen-pedido.png';
+      a.click();
+      if (btn) btn.textContent = '📥 Imagen descargada';
+    }
+  } catch (e) {
+    alert('❌ No se pudo generar la imagen: ' + e.message);
+  }
+  if (btn) setTimeout(() => { btn.textContent = textoOriginal; }, 2500);
+}
+
 // ---------- MODAL PEDIDO FINAL ----------
 function abrirPedidoFinal() {
   if (state.cart.length === 0) {
     alert('🛒 No hay productos en el pedido');
     return;
   }
-  const subtotal = state.cart.reduce((sum, item) => sum + item.precio, 0);
+  const subtotal = subtotalCarrito();
   const totalFinal = state.finalTotal || subtotal;
   if (el("campoMonto")) el("campoMonto").value = totalFinal;
   renderTablaPedidoFinal();
@@ -347,17 +477,18 @@ function renderTablaPedidoFinal() {
   let total = 0;
 
   state.cart.forEach(item => {
-    total += item.precio;
+    const cant = cantidadDe(item);
+    total += item.precio * cant;
     const row = document.createElement("tr");
     row.innerHTML = `
       <td style="font-size:10px; color:var(--muted);">${item.sku}</td>
-      <td>${item.nombre}</td>
-      <td style="text-align:right; font-weight:700;">${formatPEN(item.precio)}</td>
+      <td>${item.nombre}${cant > 1 ? ` <b>× ${cant}</b>` : ''}</td>
+      <td style="text-align:right; font-weight:700;">${formatPEN(item.precio * cant)}</td>
     `;
     tbody.appendChild(row);
   });
 
-  const subtotal = state.cart.reduce((sum, item) => sum + item.precio, 0);
+  const subtotal = subtotalCarrito();
   const totalFinal = state.finalTotal || subtotal;
 
   if (el("tablaPedidoTotal")) el("tablaPedidoTotal").textContent = formatPEN(totalFinal);
@@ -366,15 +497,30 @@ function renderTablaPedidoFinal() {
 
 // ---------- ENVIAR PEDIDO A n8n ----------
 function enviarPedido() {
-  const subtotal = state.cart.reduce((sum, item) => sum + item.precio, 0);
+  const subtotal = subtotalCarrito();
   const totalFinal = state.finalTotal || subtotal;
 
+  // Expandir cada línea en N objetos repetidos: el payload que recibe n8n
+  // es idéntico al de hacer N clics en "Agregar" (no se toca el backend).
+  const productosExpandidos = [];
+  state.cart.forEach(item => {
+    const cant = cantidadDe(item);
+    for (let k = 0; k < cant; k++) {
+      productosExpandidos.push({
+        sku: item.sku,
+        nombre: item.nombre,
+        precio: item.precio
+      });
+    }
+  });
+
+  if (productosExpandidos.length > CANTIDAD_MAX) {
+    alert(`⚠️ El pedido tiene ${productosExpandidos.length} unidades y el máximo es ${CANTIDAD_MAX}. Revisa las cantidades.`);
+    return;
+  }
+
   const payload = {
-    productos: state.cart.map(item => ({
-      sku: item.sku,
-      nombre: item.nombre,
-      precio: item.precio
-    })),
+    productos: productosExpandidos,
     total: totalFinal,
     agente: el("campoAgente")?.value || "",
     reparto: el("campoReparto")?.value || "",
@@ -648,6 +794,7 @@ function init() {
     }
   });
   el("summaryClose")?.addEventListener("click", cerrarResumen);
+  el("btnCopiarResumen")?.addEventListener("click", copiarResumenComoImagen);
   el("pedidoClose")?.addEventListener("click", cerrarPedidoFinal);
   el("btnEnviarPedido")?.addEventListener("click", enviarPedido);
 
