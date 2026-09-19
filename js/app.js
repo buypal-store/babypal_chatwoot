@@ -430,25 +430,100 @@ async function copiarResumenComoImagen() {
 
   const iconoOriginal = btn ? btn.textContent : '';
   if (btn) btn.textContent = '⏳';
-  try {
-    const canvas = await html2canvas(zona, { backgroundColor: bg, scale: 2 });
+
+  let ultimoCanvas = null;
+  const generarBlob = async () => {
+    ultimoCanvas = await html2canvas(zona, { backgroundColor: bg, scale: 2 });
     // El portapapeles solo acepta PNG para imágenes
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    return await new Promise(res => ultimoCanvas.toBlob(res, 'image/png'));
+  };
+
+  try {
+    // El ClipboardItem se crea con una PROMESA dentro del mismo clic:
+    // si se espera primero a html2canvas, la "activación de usuario"
+    // expira y el navegador rechaza la escritura al portapapeles.
+    const item = new ClipboardItem({ 'image/png': generarBlob() });
+    await navigator.clipboard.write([item]);
+    if (btn) btn.textContent = '✅';
+  } catch (e) {
+    // Portapapeles bloqueado (p. ej. iframe de Chatwoot sin permiso): descarga JPG
     try {
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      if (btn) btn.textContent = '✅';
-    } catch (e) {
-      // Portapapeles bloqueado (p. ej. iframe de Chatwoot sin permiso): descarga JPG
+      if (!ultimoCanvas) await generarBlob();
       const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/jpeg', 0.92);
+      a.href = ultimoCanvas.toDataURL('image/jpeg', 0.92);
       a.download = 'resumen-pedido.jpg';
       a.click();
       if (btn) btn.textContent = '📥';
+    } catch (e2) {
+      alert('❌ No se pudo generar la imagen: ' + e2.message);
     }
-  } catch (e) {
-    alert('❌ No se pudo generar la imagen: ' + e.message);
   }
   if (btn) setTimeout(() => { btn.textContent = iconoOriginal; }, 2000);
+}
+
+// ---------- COPIAR RESUMEN EN TEXTO PARA WHATSAPP (de cara al cliente) ----------
+function generarTextoWhatsApp() {
+  const lineas = [];
+  lineas.push('🧾 *Resumen de tu pedido*');
+  state.cart.forEach(item => {
+    const cant = cantidadDe(item);
+    const importe = item.precio * cant;
+    const nombre = item.nombre || item.sku;
+    if (importe > 0) {
+      lineas.push(`• ${cant} × ${nombre} — S/ ${Math.round(importe)}`);
+    } else {
+      lineas.push(`• ${cant} × ${nombre} — 🎁 *GRATIS*`);
+    }
+  });
+  const subtotal = subtotalCarrito();
+  const totalProductos = state.finalTotal || subtotal;
+  if (totalProductos < subtotal) {
+    lineas.push(`🏷️ Precio especial: S/ ${Math.round(totalProductos)} (antes S/ ${Math.round(subtotal)})`);
+  }
+  const envio = envioCliente();
+  if (envio > 0) lineas.push(`🛵 Envío: S/ ${envio}`);
+  lineas.push(`💲 *Total a pagar: S/ ${Math.round(totalProductos + envio)}*`);
+  const pago = el("campoPago")?.value || 'Contra-entrega';
+  const formaPago = el("campoFormaPago")?.value || '';
+  lineas.push(`💰 Pago: ${pago}${formaPago ? ' | ' + formaPago : ''}`);
+  const fecha = el("campoFecha")?.value || '';
+  if (fecha) {
+    const [y, m, d] = fecha.split('-');
+    lineas.push(`📅 Entrega: ${d}/${m}/${y}`);
+  }
+  return lineas.join('\n');
+}
+
+async function copiarTextoWhatsApp() {
+  if (state.cart.length === 0) {
+    alert('🛒 No hay productos en el pedido');
+    return;
+  }
+  const texto = generarTextoWhatsApp();
+  const btn = el("btnCopiarTexto");
+  const iconoOriginal = btn ? btn.textContent : '';
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(texto);
+    ok = true;
+  } catch (e) {
+    // Respaldo clásico: funciona incluso en iframes que bloquean el API moderno
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = texto;
+      ta.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (e2) { ok = false; }
+  }
+  if (btn) {
+    btn.textContent = ok ? '✅' : '❌';
+    setTimeout(() => { btn.textContent = iconoOriginal; }, 2000);
+  }
+  if (!ok) alert('No se pudo copiar automáticamente. Texto del resumen:\n\n' + texto);
 }
 
 // ---------- MODAL PEDIDO FINAL ----------
@@ -814,6 +889,7 @@ function init() {
   });
   el("summaryClose")?.addEventListener("click", cerrarResumen);
   el("btnCopiarTabla")?.addEventListener("click", copiarResumenComoImagen);
+  el("btnCopiarTexto")?.addEventListener("click", copiarTextoWhatsApp);
 
   // La fila ENVIO de la mini tabla se refresca mientras se escribe el monto
   el("campoEnvioCliente")?.addEventListener("input", () => {
