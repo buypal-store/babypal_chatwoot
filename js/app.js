@@ -439,11 +439,6 @@ function generarTextoWhatsApp() {
   const pago = el("campoPago")?.value || 'Contra-entrega';
   const formaPago = el("campoFormaPago")?.value || '';
   lineas.push(`💰 Pago: ${pago}${formaPago ? ' | ' + formaPago : ''}`);
-  const fecha = el("campoFecha")?.value || '';
-  if (fecha) {
-    const [y, m, d] = fecha.split('-');
-    lineas.push(`📅 Entrega: ${d}/${m}/${y}`);
-  }
   return lineas.join('\n');
 }
 
