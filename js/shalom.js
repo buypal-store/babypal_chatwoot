@@ -190,7 +190,8 @@
   // ---------- Textos de tamaño ----------
   function recibeTxt(a) {
     if (a.max_paquete) return `Recibe hasta paquete ${a.max_paquete}` + (PAQUETES[a.max_paquete] ? ` (${PAQUETES[a.max_paquete]})` : '');
-    if (a.max_kg) return `Recibe hasta ${a.max_kg} kg` + (a.max_m3 ? ` / ${a.max_m3} m³` : '');
+    // Micro: en ventanilla rechazan piezas de más de 1 m aunque el volumen quepa (ver shalom_admite)
+    if (a.max_kg) return `Recibe hasta ${a.max_kg} kg` + (a.max_m3 ? ` / ${a.max_m3} m³` : '') + (a.max_m3 && a.max_m3 <= 0.12 ? ', piezas de hasta 1 m' : '');
     return a.categoria_recibe ? 'Recibe: ' + String(a.categoria_recibe).toLowerCase() : 'Sin dato de tamaño';
   }
   function paqueteTxt(p) {
