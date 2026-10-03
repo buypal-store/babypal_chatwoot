@@ -258,6 +258,7 @@
       </div>
       <div class="shalom-link">
         <button type="button" id="shalomLinkBtn" title="El cliente elige su agencia en un mapa; aquí se llena sola">🔗 Link para que el cliente elija</button>
+        <button type="button" id="shalomMsgBtn" hidden title="Copia una frase para el cliente con el link al final">💬 Copiar mensaje</button>
         <input id="shalomLinkUrl" readonly hidden>
         <div id="shalomLinkEstado" class="estado"></div>
       </div>`;
@@ -268,6 +269,13 @@
       if (e.key === 'Enter') { e.preventDefault(); const b = $('shalomLista').querySelector('.shalom-item'); if (b) b.click(); }
     });
     $('shalomLinkBtn').addEventListener('click', crearLink);
+    $('shalomMsgBtn').addEventListener('click', () => {
+      const b = $('shalomMsgBtn');
+      copiar(mensajeLink()).then(ok => {
+        b.textContent = ok ? '✅ Mensaje copiado' : '❌ No se pudo copiar';
+        setTimeout(() => { b.textContent = '💬 Copiar mensaje'; }, 3000);
+      });
+    });
     $('shalomLinkUrl').addEventListener('focus', e => e.target.select());
     return p;
   }
@@ -348,6 +356,7 @@
     t.remove();
     return ok;
   }
+  const mensajeLink = () => `📍 Elige aquí la agencia Shalom donde recogerás tu pedido (solo te mostramos las que reciben su tamaño):\n${link.url}`;
   function crearLink() {
     const conv = conversacion();
     const items = itemsCarrito();
@@ -358,10 +367,11 @@
     rpc('shalom_link_crear', { p_conversation_id: conv, p_tienda: TIENDA, p_items: items })
       .then(token => {
         link.url = ERP_LINK + token;
-        const msg = `📍 Elige aquí la agencia Shalom donde recogerás tu pedido (solo te mostramos las que reciben su tamaño):\n${link.url}`;
         const inp = $('shalomLinkUrl'); inp.hidden = false; inp.value = link.url;
-        return copiar(msg).then(ok => {
-          btn.textContent = ok ? '✅ Copiado: pégalo en el chat' : '🔗 Copia el link de al lado';
+        $('shalomMsgBtn').hidden = false;
+        // Solo el link: es lo que se espera al pegar (la frase para el cliente va en "Copiar mensaje")
+        return copiar(link.url).then(ok => {
+          btn.textContent = ok ? '✅ Link copiado' : '🔗 Copia el link de al lado';
           if (!ok) inp.select();
           setTimeout(() => { btn.textContent = '🔗 Nuevo link'; }, 4000);
           estadoLink('Link generado. Cuando el cliente elija, la agencia se llena sola aquí.');
