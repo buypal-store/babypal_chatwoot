@@ -544,6 +544,18 @@ function enviarPedido() {
   const subtotal = subtotalCarrito();
   const totalFinal = state.finalTotal || subtotal;
 
+  // Otra agencia (no Shalom) sin "Envío a cliente": casi siempre se cobran S/ 10 y se olvidaba anotarlos (09/10/2026).
+  // Solo avisa: el asesor decide.
+  const dirTxt = String(el("campoDireccion")?.value || ""), disTxt = String(el("campoDistrito")?.value || "");
+  const otraAgencia = !/shalom/i.test(dirTxt + " " + disTxt) &&
+    (/^\s*agencia/i.test(disTxt) || /^\s*(agencia|olva|marvisur|flores|entrafesa|transportes|expreso|empresa|cruz del sur|civa|oltursa)\b/i.test(dirTxt));
+  const envioAnotado = Number(String(el("campoEnvioCliente")?.value || "").replace(",", ".")) > 0;
+  if (otraAgencia && !envioAnotado &&
+      !confirm('🚚 Es un envío por otra agencia (no Shalom) y "Envío a cliente" está vacío.\n\nNormalmente se cobran S/ 10 de envío. Si el cliente los pagó, anótalos en "Envío a cliente".\n\n¿Subir el pedido así de todas formas?')) {
+    el("campoEnvioCliente")?.focus();
+    return;
+  }
+
   // Adelanto (09/10/2026): nunca mayor que el total del pedido (productos + envío). 38 pedidos con adelanto mayor
   // dejaban saldos negativos y claves de Shalom entregadas con datos dudosos. La coma decimal se pasa a punto:
   // "248,50" llegaba a la base como 24850.
