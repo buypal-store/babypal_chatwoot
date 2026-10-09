@@ -544,6 +544,33 @@ function enviarPedido() {
   const subtotal = subtotalCarrito();
   const totalFinal = state.finalTotal || subtotal;
 
+  // Adelanto (09/10/2026): nunca mayor que el total del pedido (productos + envío). 38 pedidos con adelanto mayor
+  // dejaban saldos negativos y claves de Shalom entregadas con datos dudosos. La coma decimal se pasa a punto:
+  // "248,50" llegaba a la base como 24850.
+  const adelTxt = String(el("campoAdelanto")?.value || "").trim().replace(/\s/g, '').replace(/^S\/\.?/i, '');
+  if (adelTxt) {
+    const comoNumero = /^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(adelTxt)
+      ? adelTxt.replace(/\./g, '').replace(',', '.')          // 1.234,50
+      : adelTxt.replace(/,(?=\d{3}$)/, '').replace(',', '.');   // 1,234 → 1234 · 248,50 → 248.50
+    const adel = Number(comoNumero);
+    if (!isFinite(adel) || adel < 0) {
+      alert('⚠️ El adelanto debe ser un número (por ejemplo 50 o 248.50).');
+      el("campoAdelanto").focus();
+      return;
+    }
+    const envio = Number(String(el("campoEnvioCliente")?.value || "").replace(',', '.')) || 0;
+    const totalPedido = Math.round((Number(totalFinal) + envio) * 100) / 100;
+    if (adel > totalPedido + 0.009) {
+      const pista = totalPedido > 0 && adel >= totalPedido * 10
+        ? `\n\n¿Olvidaste el punto decimal? Por ejemplo: ${(adel / 100).toFixed(2)}`
+        : '\n\nRevisa: ¿falta un producto, el precio no es el que se cobró, o falta el envío en "Envío a cliente"?';
+      alert(`⚠️ El adelanto (S/ ${adel.toFixed(2)}) es mayor que el total del pedido (S/ ${totalPedido.toFixed(2)}).` + pista);
+      el("campoAdelanto").focus();
+      return;
+    }
+    el("campoAdelanto").value = String(adel);   // se envía siempre con punto decimal
+  }
+
   // Expandir cada línea en N objetos repetidos: el payload que recibe n8n
   // es idéntico al de hacer N clics en "Agregar" (no se toca el backend).
   const productosExpandidos = [];
