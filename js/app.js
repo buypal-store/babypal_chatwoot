@@ -559,8 +559,12 @@ function confirmarFechaPedido() {
   const corte = p.weekday === 'Sun' ? 'hoy (domingo no hay reparto)'
     : p.weekday === 'Sat' ? (min >= 13 * 60 ? '1 pm' : '')
     : (min >= 16 * 60 + 30 ? '4:30 pm' : '');
-  if (!corte || confirm(`⏰ Pasó el corte de ${corte}.\n\n¿Seguro deseas tomar el pedido con la fecha de hoy?`)) return true;
-  campo?.focus();
+  if (!corte || confirm(`⏰ Pasó el corte de ${corte}.\n\n¿Seguro deseas tomar el pedido con la fecha de hoy?\n\n(Cancelar = no sube y la fecha pasa al siguiente día de reparto)`)) return true;
+  // "No": la fecha pasa al siguiente día de reparto (mañana; si mañana es domingo, el lunes)
+  const d = new Date(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + 1));
+  if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() + 1);
+  campo.value = d.toISOString().slice(0, 10);
+  campo.focus();
   return false;
 }
 
