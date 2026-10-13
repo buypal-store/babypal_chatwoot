@@ -610,6 +610,35 @@ function enviarPedido() {
     el("campoAdelanto").value = String(adel);   // se envía siempre con punto decimal
   }
 
+  // Pago y saldo consistentes de punta a punta (13/10/2026). Lo que falta cobrar sale de aquí y lo usan la etiqueta,
+  // la app del repartidor, las guías Shalom y la validación de pagos. Antes el 20261013-6 entró como "Contra-entrega"
+  // con adelanto = total (salió "MONTO A COBRAR S/ 298" estando pagado) y pedidos "Pagado" recibían el QR para pagar.
+  //   Contra-entrega → queda saldo por cobrar.   Pagado → ya pagó todo, no se cobra nada.
+  {
+    const envioP = Number(String(el("campoEnvioCliente")?.value || "").replace(',', '.')) || 0;
+    const totalP = Math.round((Number(totalFinal) + envioP) * 100) / 100;
+    const adelP = Number(String(el("campoAdelanto")?.value || "").replace(',', '.')) || 0;
+    const pagoTxt = String(el("campoPago")?.value || "").trim();
+    if (pagoTxt && !/^(pagado|contra[\s-]?entrega)$/i.test(pagoTxt)) {
+      alert('⚠️ "Pago" debe ser "Contra-entrega" (queda saldo por cobrar) o "Pagado" (ya pagó todo).');
+      el("campoPago")?.focus();
+      return;
+    }
+    const pagadoP = /^pagado$/i.test(pagoTxt);
+    if (!pagadoP && totalP > 0 && adelP >= totalP - 0.009) {
+      if (!confirm(`⚠️ No queda nada por cobrar: el adelanto (S/ ${adelP.toFixed(2)}) cubre el total (S/ ${totalP.toFixed(2)}), pero "Pago" dice Contra-entrega.\n\nSi el cliente ya pagó todo, el pedido va como "Pagado" y sin adelanto.\n\n¿Cambiar a "Pagado"?`)) {
+        el("campoPago")?.focus();
+        return;
+      }
+      el("campoPago").value = 'Pagado';
+      el("campoAdelanto").value = '';
+    } else if (pagadoP && adelP > 0 && adelP < totalP - 0.009) {
+      alert(`⚠️ "Pago" dice Pagado, pero el adelanto (S/ ${adelP.toFixed(2)}) no cubre el total (S/ ${totalP.toFixed(2)}): quedarían S/ ${(totalP - adelP).toFixed(2)} por cobrar.\n\nSi el cliente pagó todo, borra el adelanto. Si queda saldo, cambia "Pago" a Contra-entrega.`);
+      el("campoAdelanto")?.focus();
+      return;
+    }
+  }
+
   // Expandir cada línea en N objetos repetidos: el payload que recibe n8n
   // es idéntico al de hacer N clics en "Agregar" (no se toca el backend).
   const productosExpandidos = [];
