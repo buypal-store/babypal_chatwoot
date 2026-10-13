@@ -538,7 +538,34 @@ function renderTablaPedidoFinal() {
 }
 
 // ---------- ENVIAR PEDIDO A n8n ----------
+// Corte de pedidos (12/10/2026, pedido de Wendy): lun-vie 4:30 pm, sáb 1 pm, domingo no hay reparto; hora de Lima
+// (no la de la compu). Si la FECHA es hoy y ya pasó el corte, pregunta Sí/No al subir. Sin fecha el pedido entra
+// sin número y falla: no se sube.
+function confirmarFechaPedido() {
+  const campo = el("campoFecha");
+  const fecha = String(campo?.value || "");
+  if (!fecha) {
+    alert('⚠️ Falta la FECHA del pedido. Sin fecha el pedido entra sin número y falla.');
+    campo?.focus();
+    return false;
+  }
+  const p = {};
+  new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit',
+    weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23'
+  }).formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  if (fecha !== `${p.year}-${p.month}-${p.day}`) return true;
+  const min = Number(p.hour) * 60 + Number(p.minute);
+  const corte = p.weekday === 'Sun' ? 'hoy (domingo no hay reparto)'
+    : p.weekday === 'Sat' ? (min >= 13 * 60 ? '1 pm' : '')
+    : (min >= 16 * 60 + 30 ? '4:30 pm' : '');
+  if (!corte || confirm(`⏰ Pasó el corte de ${corte}.\n\n¿Seguro deseas tomar el pedido con la fecha de hoy?`)) return true;
+  campo?.focus();
+  return false;
+}
+
 function enviarPedido() {
+  if (!confirmarFechaPedido()) return;
   // Shalom: avisa si la agencia no salió de la lista (la guía necesita la dirección oficial)
   if (window.ShalomAgencias && !window.ShalomAgencias.confirmarEnvio()) return;
   const subtotal = subtotalCarrito();
