@@ -643,6 +643,25 @@ function enviarPedido() {
     }
   }
 
+  // Correo del cliente (16/10/2026): va SOLO el correo, para enviarle su comprobante. Sigue viajando como "obs3", así que
+  // n8n, el Sheet, Power Automate, Supabase y el boleteo no cambian. Las indicaciones de entrega van en "Observación".
+  {
+    const campo = el("campoCorreo");
+    const correo = String(campo?.value || "").trim().toLowerCase();
+    if (correo && !/^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(correo)) {
+      alert('⚠️ "Correo" solo admite el correo del cliente (por ejemplo nombre@gmail.com), sin espacios ni otro texto.\n\nLas indicaciones de entrega van en "Observación".');
+      campo.focus();
+      return;
+    }
+    // Errores de tipeo frecuentes: solo avisa, el asesor decide
+    if (/@(gmial|gmal|gamil|gnail|hotmial|hotmal|hotmai|outlok)\.|\.(con|cm|comm|om)$/.test(correo) &&
+        !confirm('⚠️ Revisa el correo: "' + correo + '" parece tener un error de tipeo (por ejemplo gmail.con en vez de gmail.com).\n\n¿Subir el pedido así de todas formas?')) {
+      campo.focus();
+      return;
+    }
+    if (campo) campo.value = correo;
+  }
+
   // Expandir cada línea en N objetos repetidos: el payload que recibe n8n
   // es idéntico al de hacer N clics en "Agregar" (no se toca el backend).
   const productosExpandidos = [];
