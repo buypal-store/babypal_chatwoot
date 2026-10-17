@@ -110,14 +110,17 @@
               <label style="margin-top:6px;">Monto</label><input id="campoMonto" class="campo-pedido" readonly style="color:#22c55e; font-weight:900;" autocomplete="off">
               <label style="margin-top:6px;">Forma de Pago</label>
               <select id="campoFormaPago" class="campo-pedido" autocomplete="off">
-                <option value="">-</option>
-                <option value="Pagado">Pagado</option>
+                <option value="" disabled selected hidden></option>
                 <option value="Yape">Yape</option>
                 <option value="Plin">Plin</option>
                 <option value="Transferencia">Transferencia</option>
                 <option value="Efectivo">Efectivo</option>
               </select>
-              <label style="margin-top:6px;">Pago</label><input id="campoPago" class="campo-pedido" autocomplete="off">
+              <label style="margin-top:6px;">Pago</label>
+              <select id="campoPago" class="campo-pedido" autocomplete="off">
+                <option value="Contra-entrega">Contra-entrega</option>
+                <option value="Pagado">Pagado</option>
+              </select>
               <label style="margin-top:6px;">Boleta o Factura</label>
               <select id="campoBoleta" class="campo-pedido" autocomplete="off">
                 <option value="">-</option>
