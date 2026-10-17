@@ -538,9 +538,11 @@ function renderTablaPedidoFinal() {
 }
 
 // ---------- ENVIAR PEDIDO A n8n ----------
-// Corte de pedidos (12/10/2026, pedido de Wendy): lun-vie 4:30 pm, sáb 1 pm, domingo no hay reparto; hora de Lima
-// (no la de la compu). Si la FECHA es hoy y ya pasó el corte, pregunta Sí/No al subir. Sin fecha el pedido entra
-// sin número y falla: no se sube.
+// La FECHA la pone el asesor: el campo nace con la de hoy y solo cambia si el la cambia a mano.
+// 17/10/2026: se retiro el corte horario (lun-vie 4:30 pm / sab 1 pm) que se habia puesto el 12/10. Al
+// cancelar el aviso reescribia el campo al siguiente dia de reparto, asi que un sabado por la tarde todos
+// los pedidos acababan con fecha del lunes. Lo unico que queda es exigir que haya fecha: sin fecha el
+// pedido entra sin numero y falla.
 function confirmarFechaPedido() {
   const campo = el("campoFecha");
   const fecha = String(campo?.value || "");
@@ -549,23 +551,7 @@ function confirmarFechaPedido() {
     campo?.focus();
     return false;
   }
-  const p = {};
-  new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit',
-    weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23'
-  }).formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
-  if (fecha !== `${p.year}-${p.month}-${p.day}`) return true;
-  const min = Number(p.hour) * 60 + Number(p.minute);
-  const corte = p.weekday === 'Sun' ? 'hoy (domingo no hay reparto)'
-    : p.weekday === 'Sat' ? (min >= 13 * 60 ? '1 pm' : '')
-    : (min >= 16 * 60 + 30 ? '4:30 pm' : '');
-  if (!corte || confirm(`⏰ Pasó el corte de ${corte}.\n\n¿Seguro deseas tomar el pedido con la fecha de hoy?\n\n(Cancelar = no sube y la fecha pasa al siguiente día de reparto)`)) return true;
-  // "No": la fecha pasa al siguiente día de reparto (mañana; si mañana es domingo, el lunes)
-  const d = new Date(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + 1));
-  if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() + 1);
-  campo.value = d.toISOString().slice(0, 10);
-  campo.focus();
-  return false;
+  return true;
 }
 
 function enviarPedido() {
