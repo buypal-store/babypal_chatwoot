@@ -554,7 +554,22 @@ function confirmarFechaPedido() {
   return true;
 }
 
+// 25/10/2026: el ERP tarda unos 5-10 s (guarda y copia a la hoja "Intento 1"). Sin aviso en pantalla, la asesora
+// volvía a hacer clic y el pedido 20261025-4 entró 4 veces. Mientras se sube, el botón queda bloqueado.
+let subiendoPedido = false;
+function bloquearEnvio(si) {
+  subiendoPedido = si;
+  const b = el("btnEnviarPedido");
+  if (!b) return;
+  if (si) { b.dataset.texto = b.innerHTML; b.innerHTML = "⏳ Subiendo pedido… espera"; }
+  else if (b.dataset.texto) b.innerHTML = b.dataset.texto;
+  b.disabled = si;
+  b.style.opacity = si ? "0.6" : "";
+  b.style.cursor = si ? "wait" : "";
+}
+
 function enviarPedido() {
+  if (subiendoPedido) return;
   if (!confirmarFechaPedido()) return;
   // Shalom: avisa si la agencia no salió de la lista (la guía necesita la dirección oficial)
   if (window.ShalomAgencias && !window.ShalomAgencias.confirmarEnvio()) return;
@@ -704,8 +719,10 @@ function enviarPedido() {
 
   // 24/10/2026: el pedido va al ERP (api/tomadorPedidoDB), ya no a n8n. Guarda en Supabase con el "Pago" elegido y deja
   // la copia de respaldo en la hoja "Intento 1". Va como text/plain para que el navegador no haga la consulta CORS previa.
+  bloquearEnvio(true);
   fetch('https://erp.buypal.com.pe/api/tomadorPedidoDB', {
     method: 'POST',
+    signal: AbortSignal.timeout(60000),
     headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body: JSON.stringify(payload)
   })
@@ -720,8 +737,11 @@ function enviarPedido() {
     }
   })
   .catch(err => {
-      alert('❌ Error de conexión: ' + err.message);
-    });
+    alert(err && err.name === 'TimeoutError'
+      ? '❌ El ERP no respondió en 60 s. Antes de volver a subirlo, revisa en el ERP si el pedido ya entró.'
+      : '❌ Error de conexión: ' + err.message);
+  })
+  .finally(() => bloquearEnvio(false));
 }
 
 // ---------- CARGAR DATOS DESDE n8n (IA) ----------
