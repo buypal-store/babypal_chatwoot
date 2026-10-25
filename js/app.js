@@ -702,21 +702,24 @@ function enviarPedido() {
 
   console.log("📤 Enviando a n8n:", payload);
 
-  fetch('https://n8n.buypal.com.pe/webhook/Subir_pedido_drive', {
+  // 24/10/2026: el pedido va al ERP (api/tomadorPedidoDB), ya no a n8n. Guarda en Supabase con el "Pago" elegido y deja
+  // la copia de respaldo en la hoja "Intento 1". Va como text/plain para que el navegador no haga la consulta CORS previa.
+  fetch('https://erp.buypal.com.pe/api/tomadorPedidoDB', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body: JSON.stringify(payload)
   })
-    .then(res => {
-      if (res.ok) {
-        alert('✅ Pedido subido correctamente');
-        cerrarPedidoFinal();
-        vaciarCarrito();
-      } else {
-        alert('❌ Error al enviar el pedido');
-      }
-    })
-    .catch(err => {
+  .then(async res => {
+    const r = await res.json().catch(() => ({}));
+    if (res.ok && r.ok) {
+      alert('✅ ' + (r.mensaje || 'Pedido subido correctamente'));
+      cerrarPedidoFinal();
+      vaciarCarrito();
+    } else {
+      alert('❌ ' + (r.mensaje || 'Error al enviar el pedido (' + res.status + ')'));
+    }
+  })
+  .catch(err => {
       alert('❌ Error de conexión: ' + err.message);
     });
 }
@@ -727,9 +730,11 @@ async function cargarDatosDesdeN8n() {
   if (!conversationId) return;
 
   try {
-    const response = await fetch('https://n8n.buypal.com.pe/webhook/Tomar_pedido_IA', {
+    // 24/10/2026: los datos los arma el ERP (api/tomadorIADB), ya no n8n. El adelanto sale de las capturas de pago
+    // posteriores al último pedido del chat (las verificadas con BBVA llevan ✓; las demás dicen "revisar").
+    const response = await fetch('https://erp.buypal.com.pe/api/tomadorIADB', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
       body: JSON.stringify({ id: Number(conversationId) })
     });
     const datos = await response.json();
@@ -770,6 +775,18 @@ function autocompletarCampos(datos) {
       }
     }
   });
+  // De dónde sale el adelanto sugerido (ej. "S/ 50.00 Yape ✓BBVA + S/ 30.00 Bcp (revisar)"): debajo del campo
+  const campoAdel = el('campoAdelanto');
+  if (campoAdel && datos.adelanto_detalle) {
+    let nota = el('adelantoDetalle');
+    if (!nota) {
+      nota = document.createElement('div');
+      nota.id = 'adelantoDetalle';
+      nota.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px;';
+      campoAdel.insertAdjacentElement('afterend', nota);
+    }
+    nota.textContent = 'Capturas: ' + datos.adelanto_detalle;
+  }
   // Pedido Shalom: abre el buscador de agencias con lo que escribió el cliente
   if (window.ShalomAgencias) window.ShalomAgencias.revisar();
 }
