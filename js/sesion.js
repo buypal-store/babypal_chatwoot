@@ -29,7 +29,11 @@
       const nombre = document.createElement('span');
       const salir = document.createElement('a');
       salir.href = '#'; salir.textContent = 'Salir'; salir.style.cssText = 'color:#fca5a5;text-decoration:none';
-      salir.onclick = e => { e.preventDefault(); if (confirm('¿Cerrar la sesión del ERP en este navegador?')) window.SesionERP.salir(); };
+      // Sin confirm(): el panel de Chatwoot (sandbox sin allow-modals) lo ignora; se confirma con un segundo clic
+      salir.onclick = e => { e.preventDefault();
+        if (salir.dataset.ok) { window.SesionERP.salir(); return; }
+        salir.dataset.ok = '1'; salir.textContent = '¿Salir? Clic otra vez';
+        setTimeout(() => { delete salir.dataset.ok; salir.textContent = 'Salir'; }, 4000); };
       chip.append(nombre, salir);
       document.body.appendChild(chip);
     }
