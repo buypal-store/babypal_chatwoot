@@ -712,6 +712,7 @@ function enviarPedido() {
     validacion: el("campoValidacion")?.value || "",
     adelanto: el("campoAdelanto")?.value || "",
     conversation_id: new URLSearchParams(window.location.search).get('conversation_id') || "",
+    sesion: window.SesionERP ? SesionERP.token() : "",   // 31/10/2026: usuario del ERP (js/sesion.js)
     fecha: document.getElementById('campoFecha')?.value || ""
   };
 
@@ -728,6 +729,11 @@ function enviarPedido() {
   })
   .then(async res => {
     const r = await res.json().catch(() => ({}));
+    if (res.status === 401 && window.SesionERP) {
+      SesionERP.vencida();
+      alert('🔒 Inicia sesión con tu usuario del ERP y vuelve a presionar "Subir pedido". El carrito sigue igual.');
+      return;
+    }
     if (res.ok && r.ok) {
       alert('✅ ' + (r.mensaje || 'Pedido subido correctamente'));
       cerrarPedidoFinal();
@@ -755,8 +761,9 @@ async function cargarDatosDesdeN8n() {
     const response = await fetch('https://erp.buypal.com.pe/api/tomadorIADB', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({ id: Number(conversationId) })
+      body: JSON.stringify({ id: Number(conversationId), sesion: window.SesionERP ? await SesionERP.asegurar() : '' })
     });
+    if (response.status === 401 && window.SesionERP) { await SesionERP.vencida(); return cargarDatosDesdeN8n(); }
     const datos = await response.json();
 
     if (datos && Object.keys(datos).length > 0) {
