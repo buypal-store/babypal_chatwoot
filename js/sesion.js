@@ -52,7 +52,7 @@
         'style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b0f14;color:#e5e7eb;text-transform:uppercase">' +
         '<input name="clave" type="password" autocomplete="current-password" placeholder="Contraseña" required ' +
         'style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b0f14;color:#e5e7eb">' +
-        '<button type="submit" style="width:100%;padding:10px;border:0;border-radius:8px;background:#22c55e;color:#0b0f14;font-weight:600;cursor:pointer">Entrar</button>' +
+        '<button type="button" style="width:100%;padding:10px;border:0;border-radius:8px;background:#22c55e;color:#0b0f14;font-weight:600;cursor:pointer">Entrar</button>' +
         '<div data-error style="font-size:13px;color:#f87171;margin-top:10px;min-height:1em"></div>' +
         '<div style="font-size:12px;color:#9ca3af;margin-top:6px">¿Primera vez u olvidaste tu contraseña? Entra a ' +
         '<a href="https://erp.buypal.com.pe" target="_blank" rel="noopener" style="color:#86efac">erp.buypal.com.pe</a> y luego vuelve aquí.</div>' +
@@ -61,8 +61,9 @@
       if (aviso) { const a = fondo.querySelector('[data-aviso]'); a.textContent = aviso; a.style.display = 'block'; }
       const anterior = leer();
       if (anterior && anterior.codigo) f.codigo.value = anterior.codigo;
-      f.onsubmit = async e => {
-        e.preventDefault();
+      const entrar = async () => {
+        if (boton.disabled) return;
+        if (!f.codigo.value.trim() || !f.clave.value) { error.textContent = 'Escribe tu código y tu contraseña.'; return; }
         error.textContent = ''; boton.disabled = true; boton.textContent = 'Entrando…';
         try {
           const { status, d } = await post({ accion: 'login', codigo: f.codigo.value.trim().toUpperCase(), password: f.clave.value });
@@ -78,6 +79,10 @@
         }
         boton.disabled = false; boton.textContent = 'Entrar'; f.clave.value = ''; f.clave.focus();
       };
+      // 01/11/2026: el panel de pedidos de Chatwoot (iframe con sandbox sin allow-forms) bloquea el envío de formularios,
+      // así que "Entrar" y la tecla Enter llaman a entrar() directo, sin submit.
+      boton.onclick = entrar;
+      f.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); entrar(); } };
       document.body.appendChild(fondo);
       (f.codigo.value ? f.clave : f.codigo).focus();
     });
