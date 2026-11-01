@@ -328,9 +328,9 @@
       const q = $('shalomBuscar'); q.focus(); pintarLista(q.value, false);
     });
   }
-  function elegir(a, porCliente) {
+  async function elegir(a, porCliente) {
     if (!porCliente && estadoDe(a) === 'no' &&
-        !confirm(`❌ ${a.nombre} no recibe este pedido.\n${recibeTxt(a)}.\n\nEn ventanilla lo rechazarían. ¿Elegirla igual?`)) return;
+        !await Avisos.preguntar(`❌ ${a.nombre} no recibe este pedido.\n${recibeTxt(a)}.\n\nEn ventanilla lo rechazarían. ¿Elegirla igual?`)) return;
     elegida = a;
     elegidaPorCliente = !!porCliente;
     escribiendoNosotros = true;
@@ -464,11 +464,11 @@
     if (!/shalo[mn]/i.test(dir) || !agencias) return true;
     const a = coincideOficial(dir);
     if (!a) {
-      return confirm('⚠️ La agencia Shalom no se eligió de la lista.\n\nLa guía de remisión necesita la dirección oficial de la agencia ' +
+      return Avisos.preguntar('⚠️ La agencia Shalom no se eligió de la lista.\n\nLa guía de remisión necesita la dirección oficial de la agencia ' +
         '(usa el buscador 🚚 sobre los campos).\n\n¿Subir el pedido igual?');
     }
     if (estadoDe(a) === 'no') {
-      return confirm(`❌ ${a.nombre} no recibe este pedido (${minus(recibeTxt(a))}).\nEn ventanilla lo rechazarían.\n\n¿Subir el pedido igual?`);
+      return Avisos.preguntar(`❌ ${a.nombre} no recibe este pedido (${minus(recibeTxt(a))}).\nEn ventanilla lo rechazarían.\n\n¿Subir el pedido igual?`);
     }
     return true;
   }

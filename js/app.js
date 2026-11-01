@@ -75,13 +75,13 @@ function renderGrid() {
 
   // Eventos de los botones "Agregar" (solo los habilitados)
   document.querySelectorAll('.btn-agregar').forEach(btn => {
-    btn.addEventListener('click', function (e) {
+    btn.addEventListener('click', async function (e) {
       if (this.disabled) return;                    // seguridad extra
       const index = parseInt(this.dataset.index);
       const prod = productos[index];
 
       const qtyInput = this.closest('.card-actions')?.querySelector('.qty-input');
-      const cantidad = validarCantidad(qtyInput?.value, prod.nombre);
+      const cantidad = await validarCantidad(qtyInput?.value, prod.nombre);
       if (cantidad === null) return;
       if (qtyInput) qtyInput.value = 1;
 
@@ -112,7 +112,7 @@ function renderGrid() {
 const CANTIDAD_MAX = 500;
 const CANTIDAD_CONFIRMAR = 50;
 
-function validarCantidad(valor, nombreProducto) {
+async function validarCantidad(valor, nombreProducto) {
   let c = Math.round(Number(valor));
   if (!c || c < 1) c = 1;
   if (c > CANTIDAD_MAX) {
@@ -120,7 +120,7 @@ function validarCantidad(valor, nombreProducto) {
     return null;
   }
   if (c >= CANTIDAD_CONFIRMAR) {
-    if (!confirm(`¿Confirmas ${c} unidades de "${nombreProducto || 'este producto'}"?`)) return null;
+    if (!await Avisos.preguntar(`¿Confirmas ${c} unidades de "${nombreProducto || 'este producto'}"?`)) return null;
   }
   return c;
 }
@@ -328,12 +328,12 @@ function eliminarDelCarrito(cartId) {
       this.select();
     });
 
-    input.addEventListener('blur', function () {
+    input.addEventListener('blur', async function () {
       const cartId = parseInt(this.dataset.cartId);
       const item = state.cart.find(i => i.cartId === cartId);
       if (!item) return;
 
-      const nueva = validarCantidad(this.value, item.nombre);
+      const nueva = await validarCantidad(this.value, item.nombre);
       if (nueva === null) {
         this.value = cantidadDe(item);   // se mantiene la cantidad anterior
       } else {
@@ -568,11 +568,19 @@ function bloquearEnvio(si) {
   b.style.cursor = si ? "wait" : "";
 }
 
-function enviarPedido() {
+// 01/11/2026: las preguntas esperan la respuesta (Avisos.preguntar, js/avisos.js); mientras se revisa, otro clic no abre otra revisión.
+let revisandoPedido = false;
+async function enviarPedido() {
+  if (revisandoPedido) return;
+  revisandoPedido = true;
+  try { await enviarPedidoRevisado(); } finally { revisandoPedido = false; }
+}
+
+async function enviarPedidoRevisado() {
   if (subiendoPedido) return;
   if (!confirmarFechaPedido()) return;
   // Shalom: avisa si la agencia no salió de la lista (la guía necesita la dirección oficial)
-  if (window.ShalomAgencias && !window.ShalomAgencias.confirmarEnvio()) return;
+  if (window.ShalomAgencias && !(await window.ShalomAgencias.confirmarEnvio())) return;
   const subtotal = subtotalCarrito();
   const totalFinal = state.finalTotal || subtotal;
 
@@ -583,7 +591,7 @@ function enviarPedido() {
     (/^\s*agencia/i.test(disTxt) || /^\s*(agencia|olva|marvisur|flores|entrafesa|transportes|expreso|empresa|cruz del sur|civa|oltursa)\b/i.test(dirTxt));
   const envioAnotado = Number(String(el("campoEnvioCliente")?.value || "").replace(",", ".")) > 0;
   if (otraAgencia && !envioAnotado &&
-      !confirm('🚚 Es un envío por otra agencia (no Shalom) y "Envío a cliente" está vacío.\n\nNormalmente se cobran S/ 10 de envío. Si el cliente los pagó, anótalos en "Envío a cliente".\n\n¿Subir el pedido así de todas formas?')) {
+      !await Avisos.preguntar('🚚 Es un envío por otra agencia (no Shalom) y "Envío a cliente" está vacío.\n\nNormalmente se cobran S/ 10 de envío. Si el cliente los pagó, anótalos en "Envío a cliente".\n\n¿Subir el pedido así de todas formas?')) {
     el("campoEnvioCliente")?.focus();
     return;
   }
@@ -631,7 +639,7 @@ function enviarPedido() {
     }
     const pagadoP = /^pagado$/i.test(pagoTxt);
     if (!pagadoP && totalP > 0 && adelP >= totalP - 0.009) {
-      if (!confirm(`⚠️ No queda nada por cobrar: el adelanto (S/ ${adelP.toFixed(2)}) cubre el total (S/ ${totalP.toFixed(2)}), pero "Pago" dice Contra-entrega.\n\nSi el cliente ya pagó todo, el pedido va como "Pagado" y sin adelanto.\n\n¿Cambiar a "Pagado"?`)) {
+      if (!await Avisos.preguntar(`⚠️ No queda nada por cobrar: el adelanto (S/ ${adelP.toFixed(2)}) cubre el total (S/ ${totalP.toFixed(2)}), pero "Pago" dice Contra-entrega.\n\nSi el cliente ya pagó todo, el pedido va como "Pagado" y sin adelanto.\n\n¿Cambiar a "Pagado"?`)) {
         el("campoPago")?.focus();
         return;
       }
@@ -656,7 +664,7 @@ function enviarPedido() {
     }
     // Errores de tipeo frecuentes: solo avisa, el asesor decide
     if (/@(gmial|gmal|gamil|gnail|hotmial|hotmal|hotmai|outlok)\.|\.(con|cm|comm|om)$/.test(correo) &&
-        !confirm('⚠️ Revisa el correo: "' + correo + '" parece tener un error de tipeo (por ejemplo gmail.con en vez de gmail.com).\n\n¿Subir el pedido así de todas formas?')) {
+        !await Avisos.preguntar('⚠️ Revisa el correo: "' + correo + '" parece tener un error de tipeo (por ejemplo gmail.con en vez de gmail.com).\n\n¿Subir el pedido así de todas formas?')) {
       campo.focus();
       return;
     }
