@@ -17,9 +17,12 @@
 //                     enviarPedido        → ShalomAgencias.confirmarEnvio()
 (function () {
   const SUPA_URL = 'https://fxwndndaabyktruigxal.supabase.co';
-  // Llave publicable: solo puede LEER shalom_agencias y llamar a las funciones shalom_* de arriba
+  // Llave publicable: solo puede LEER shalom_agencias (lista pública de agencias). Las funciones shalom_* pasan por el ERP
+  // con la sesión del asesor (02/11/2026, api/tomadorShalomDB): con la llave pública cualquiera podía crear links o ver
+  // la agencia elegida de cualquier conversación.
   const SUPA_KEY = 'sb_publishable_SneWwcbXYItpg1dIyjT0Kw_CinL31Jd';
   const ERP_LINK = 'https://erp.buypal.com.pe/agencia/';
+  const ERP_SHALOM = 'https://erp.buypal.com.pe/api/tomadorShalomDB';
   const CACHE = 'shalom_agencias_v2';
   const CACHE_MS = 12 * 3600 * 1000;
   const MAX_SUGERENCIAS = 6;
@@ -56,10 +59,15 @@
   const textoDireccion = a => a.direccion ? `SHALOM: ${a.nombre} - ${a.direccion}` : `SHALOM: ${a.nombre}`;
   const estadoDe = a => (a && admision.agencias[String(a.ter_id)]) || 'si';
 
-  function rpc(nombre, args) {
-    return fetch(`${SUPA_URL}/rest/v1/rpc/${nombre}`, {
-      method: 'POST', headers: { apikey: SUPA_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args),
-    }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  // text/plain: así el navegador no hace la consulta previa CORS. Si la sesión venció, pide entrar y reintenta una vez.
+  async function rpc(nombre, args, reintento) {
+    const sesion = window.SesionERP ? await SesionERP.asegurar() : '';
+    const r = await fetch(ERP_SHALOM, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify({ fn: nombre, args, sesion }),
+    });
+    if (r.status === 401 && window.SesionERP && !reintento) { await SesionERP.vencida(); return rpc(nombre, args, true); }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
   }
 
   // ---------- Datos ----------
