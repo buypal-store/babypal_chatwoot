@@ -724,7 +724,6 @@ async function enviarPedidoRevisado() {
     fecha: document.getElementById('campoFecha')?.value || ""
   };
 
-  console.log("📤 Enviando a n8n:", payload);
 
   // 24/10/2026: el pedido va al ERP (api/tomadorPedidoDB), ya no a n8n. Guarda en Supabase con el "Pago" elegido y deja
   // la copia de respaldo en la hoja "Intento 1". Va como text/plain para que el navegador no haga la consulta CORS previa.
