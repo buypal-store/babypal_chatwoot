@@ -1,14 +1,14 @@
 // ---------- OTRAS AGENCIAS (no Shalom) ----------
 // Botón "🚛 Agencia" junto a "🚚 Shalom" sobre el campo Dirección. Sugiere agencias que NO son Shalom
 // (Marvisur, Flores, Olva…) con su sede y dirección, para que la guía de remisión salga con la dirección buena.
-// Datos: vista herramientas.agencias_externas (se arma sola desde los pedidos ya subidos con distrito "Agencia":
+// Datos: vista herramientas.agencias_externas (se arma sola desde los pedidos ya subidos con distrito "Agencia";
+// desde el 03/11/2026 se pide al ERP con la sesión del asesor —api/tomadorShalomDB, fn 'agencias_externas'— y no a
+// Supabase con la llave pública, porque la vista trae direcciones escritas en pedidos:
 // si una agencia no está, se escribe completa una vez —"Marvisur: Yauyos — Av. Nicolás Arriola 2159"— y
 // aparece sola para la próxima). Al elegir: Dirección = "Agencia: Sede — dirección" y Distrito = "Agencia".
 // Este archivo es IDÉNTICO en los 4 tomadores. Maqueta de Wendy: tomador_boton_agencia.html (12/10/2026).
 (function () {
-  const SUPA_URL = 'https://fxwndndaabyktruigxal.supabase.co';
-  // La misma llave publicable del buscador Shalom; para esta vista solo tiene lectura
-  const SUPA_KEY = 'sb_publishable_SneWwcbXYItpg1dIyjT0Kw_CinL31Jd';
+  const ERP_SHALOM = 'https://erp.buypal.com.pe/api/tomadorShalomDB';
   const CACHE = 'agencias_externas_v1';
   const CACHE_MS = 6 * 3600 * 1000;
   const MAX_SUGERENCIAS = 6;
@@ -27,10 +27,17 @@
       const c = JSON.parse(localStorage.getItem(CACHE) || 'null');
       if (c && Date.now() - c.t < CACHE_MS && Array.isArray(c.d) && c.d.length) { agencias = c.d; return Promise.resolve(agencias); }
     } catch (e) { /* sin almacenamiento: se descarga */ }
-    const url = `${SUPA_URL}/rest/v1/agencias_externas?select=agencia,sede,veces,ultima_vez&order=veces.desc,ultima_vez.desc&limit=500`;
-    // Accept-Profile: la vista vive en el esquema "herramientas", no en public
-    cargando = fetch(url, { headers: { apikey: SUPA_KEY, 'Accept-Profile': 'herramientas' } })
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    // text/plain: sin consulta previa CORS (como shalom.js). Si la sesión venció, pide entrar y reintenta una vez.
+    const pedir = async reintento => {
+      const sesion = window.SesionERP ? await SesionERP.asegurar() : '';
+      const r = await fetch(ERP_SHALOM, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify({ fn: 'agencias_externas', sesion }),
+      });
+      if (r.status === 401 && window.SesionERP && !reintento) { await SesionERP.vencida(); return pedir(true); }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    };
+    cargando = pedir(false)
       .then(d => {
         agencias = d.map(a => Object.assign(a, { _texto: norm(a.agencia + ' ' + a.sede) }));
         try { localStorage.setItem(CACHE, JSON.stringify({ t: Date.now(), d: agencias })); } catch (e) { /* lleno o bloqueado */ }
