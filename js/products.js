@@ -31,6 +31,10 @@ const IMAGENES_MANUALES = {
 // A=SKU  B=Nombre  C=Categoria  D=Precio  E=Stock  F=Linea/Rubro
 const COL = { sku: 0, nombre: 1, categoria: 2, precio: 3, stock: 4, rubro: 5 };
 
+// Los productos se pintan con innerHTML (también dentro de alt="…"): sin < > y con la comilla doble como signo de
+// pulgada (″, se ve igual), para que un texto de la hoja no pueda meter código en la página (03/11/2026).
+const sinHtml = s => String(s).replace(/[<>]/g, '').replace(/"/g, '″');
+
 async function cargarProductos() {
   try {
     const csv   = await (await fetch(CSV_URL)).text();
@@ -40,9 +44,9 @@ async function cargarProductos() {
     window.productosData = datos
       .filter(f => f[COL.sku]?.trim())
       .map(f => ({
-        sku:       f[COL.sku].trim(),
-        nombre:    (f[COL.nombre]    || "").trim(),
-        categoria: (f[COL.categoria] || "").trim(),
+        sku:       sinHtml(f[COL.sku].trim()),
+        nombre:    sinHtml((f[COL.nombre]    || "").trim()),
+        categoria: sinHtml((f[COL.categoria] || "").trim()),
         precio:    Number(f[COL.precio]) || 0,
         stock:     Number(f[COL.stock]) || 0,
         rubro:     (f[COL.rubro]     || "").trim(),
