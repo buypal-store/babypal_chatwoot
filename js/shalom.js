@@ -408,7 +408,7 @@
           estadoLink(`El cliente eligió ${a.nombre}, pero aquí hay otra agencia elegida a mano.`);
         }
       } else if (!e && r) {
-        estadoLink(r.abierto ? '👀 El cliente abrió el link, aún no elige.' : r.pendiente ? '⏳ Link enviado, el cliente aún no lo abre.' : '');
+        estadoLink(r.abierto ? '👀 El link ya se abrió (cliente o alguien con el link), aún no eligen agencia.' : r.pendiente ? '⏳ Link creado: pégalo en el chat. El cliente aún no lo abre.' : '');
       }
       if (e || !(r && r.pendiente)) pararSondeo();
       return r;

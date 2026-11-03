@@ -52,7 +52,7 @@
         '<div style="font-size:17px;font-weight:600;margin-bottom:4px">🔒 Inicia sesión</div>' +
         '<div style="font-size:13px;color:#9ca3af;margin-bottom:14px">Con tu código y contraseña del ERP.</div>' +
         '<div data-aviso style="display:none;font-size:13px;color:#fbbf24;margin-bottom:10px"></div>' +
-        '<input name="codigo" autocomplete="username" placeholder="Código (ej. WEN)" required ' +
+        '<input name="codigo" autocomplete="username" placeholder="Tu código" required ' +
         'style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b0f14;color:#e5e7eb;text-transform:uppercase">' +
         '<input name="clave" type="password" autocomplete="current-password" placeholder="Contraseña" required ' +
         'style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b0f14;color:#e5e7eb">' +
