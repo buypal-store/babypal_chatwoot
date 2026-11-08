@@ -728,6 +728,13 @@ async function enviarPedidoRevisado() {
   // 24/10/2026: el pedido va al ERP (api/tomadorPedidoDB), ya no a n8n. Guarda en Supabase con el "Pago" elegido y deja
   // la copia de respaldo en la hoja "Intento 1". Va como text/plain para que el navegador no haga la consulta CORS previa.
   bloquearEnvio(true);
+  mandarPedido(payload);
+}
+
+// 08/11/2026: el ERP pregunta antes de guardar si el cliente ya tiene pedido con el mismo producto (saldo o voucher
+// subido otra vez) o si el chat tiene la etiqueta "agencia" y la dirección dice Shalom. Responde 409 { confirmar }:
+// aquí se pregunta Sí/No y, con Sí, se reenvía el MISMO pedido con confirmar_repetido.
+function mandarPedido(payload) {
   fetch('https://erp.buypal.com.pe/api/tomadorPedidoDB', {
     method: 'POST',
     signal: AbortSignal.timeout(60000),
@@ -740,6 +747,15 @@ async function enviarPedidoRevisado() {
       SesionERP.vencida();
       alert('🔒 Inicia sesión con tu usuario del ERP y vuelve a presionar "Subir pedido". El carrito sigue igual.');
       return;
+    }
+    if (res.status === 409 && r.confirmar) {
+      bloquearEnvio(false);
+      const texto = String(r.mensaje || '').replace(/\s*\(Si ves este mensaje[^)]*\)\s*$/, '');
+      if (await Avisos.preguntar('⚠️ REVISA ANTES DE SUBIR\n\n' + texto + '\n\n¿Subir el pedido de todas formas?')) {
+        bloquearEnvio(true);
+        mandarPedido({ ...payload, confirmar_repetido: true });
+      }
+      return 'pregunta';
     }
     if (res.ok && r.ok) {
       alert('✅ ' + (r.mensaje || 'Pedido subido correctamente'));
@@ -754,7 +770,7 @@ async function enviarPedidoRevisado() {
       ? '❌ El ERP no respondió en 60 s. Antes de volver a subirlo, revisa en el ERP si el pedido ya entró.'
       : '❌ Error de conexión: ' + err.message);
   })
-  .finally(() => bloquearEnvio(false));
+  .then(v => { if (v !== 'pregunta') bloquearEnvio(false); }, () => bloquearEnvio(false));
 }
 
 // ---------- CARGAR DATOS DESDE n8n (IA) ----------
