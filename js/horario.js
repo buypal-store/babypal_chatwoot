@@ -33,6 +33,7 @@
     }
     if (!desde && !hasta) return { ok: true, valor: '' };
     if ((desde && !HORA.test(desde)) || (hasta && !HORA.test(hasta))) return { ok: false, error: 'Hora no válida' };
+    if (desde === '00:00' || hasta === '00:00') return { ok: false, error: 'Las 12:00 a. m. (medianoche) no sirven como límite.' };
     if (desde && hasta && desde >= hasta) return { ok: false, error: '«Desde» tiene que ser antes que «Hasta».' };
     return { ok: true, valor: desde + '-' + hasta };
   }
@@ -211,7 +212,16 @@
       else res.textContent = v.error;
       $('.hsel-ok').disabled = !v.ok;
     };
-    var enfocar = function (l) { activo = l; if (r[l] != null) ponerRuedas(r[l]); pintar(); };
+    // Con el límite apagado las ruedas quedan atenuadas en su hora sugerida
+    // (10:00 a. m. / 3:00 p. m.), no en 1:00 a. m.
+    // Hora con que se prende un límite: la sugerida, salvo que choque con el otro
+    // (con "hasta las 11", DESDE arranca 2 h antes; con "desde las 4", HASTA 3 h después).
+    var porDefecto = function (l) {
+      if (l === 'desde' && r.hasta != null && DEF.desde >= r.hasta) return Math.max(15, r.hasta - 120);
+      if (l === 'hasta' && r.desde != null && DEF.hasta <= r.desde) return Math.min(23 * 60 + 45, r.desde + 180);
+      return DEF[l];
+    };
+    var enfocar = function (l) { activo = l; ponerRuedas(r[l] != null ? r[l] : porDefecto(l)); pintar(); };
 
     Object.keys(ruedas).forEach(function (k) {
       var el = ruedas[k], t = null;
@@ -225,7 +235,7 @@
       });
       el.addEventListener('click', function (e) {
         var d = e.target.closest('[data-i]');
-        if (d) el.scrollTo({ top: +d.dataset.i * ALTO, behavior: 'smooth' });
+        if (d) { el.scrollTop = +d.dataset.i * ALTO; marcar(); if (r[activo] != null) { r[activo] = leerRuedas(); pintar(); } }
       });
       el.addEventListener('keydown', function (e) {
         if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
@@ -237,8 +247,9 @@
     fondo.querySelectorAll('.hsel-lim').forEach(function (b) {
       b.addEventListener('click', function (e) {
         var l = b.dataset.l;
-        if (e.target.closest('[data-sw]')) r[l] = r[l] != null ? null : DEF[l];
-        else if (r[l] == null) r[l] = DEF[l];
+        if (r[activo] != null) r[activo] = leerRuedas();
+        if (e.target.closest('[data-sw]')) r[l] = r[l] != null ? null : porDefecto(l);
+        else if (r[l] == null) r[l] = porDefecto(l);
         enfocar(l);
       });
     });
@@ -265,8 +276,25 @@
       if (typeof o.alListo === 'function') o.alListo(v.valor);
     };
     var teclas = function (e) {
-      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrar(); }
-      else if (e.key === 'Enter' && !(e.target && e.target.closest && e.target.closest('.hsel-chips,.hsel-lims,.hsel-acc'))) { e.preventDefault(); listo(); }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrar(); return; }
+      if (e.key === 'Enter') {
+        // Con el selector abierto, Enter es solo suyo: la pantalla de atrás no
+        // lo recibe (Ctrl+Enter del Admin guardaba el pedido con el horario viejo).
+        e.preventDefault(); e.stopPropagation();
+        var b = e.target && e.target.closest && e.target.closest('.hsel button');
+        if (b && !(e.ctrlKey || e.metaKey)) b.click(); else listo();
+        return;
+      }
+      if (e.key === 'Tab') {
+        // El foco no sale del selector (es modal)
+        var f = [].slice.call(fondo.querySelectorAll('button:not([disabled]),[tabindex="0"]'));
+        if (!f.length) return;
+        var i = f.indexOf(document.activeElement);
+        if (i === -1 || (e.shiftKey && i === 0) || (!e.shiftKey && i === f.length - 1)) {
+          e.preventDefault(); e.stopPropagation();
+          f[e.shiftKey ? f.length - 1 : 0].focus();
+        }
+      }
     };
     $('.hsel-no').addEventListener('click', cerrar);
     $('.hsel-ok').addEventListener('click', listo);
