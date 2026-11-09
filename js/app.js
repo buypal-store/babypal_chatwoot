@@ -696,6 +696,8 @@ async function enviarPedidoRevisado() {
     agente: el("campoAgente")?.value || "",
     reparto: el("campoReparto")?.value || "",
     turno: el("campoTurno")?.value || "T",
+    // Horario de entrega (09/11/2026): "-10:00", "15:00-", "09:00-13:00" o "" (cualquier hora). Ver js/horario.js
+    horario: el("campoHorario")?.value || "",
     formaPago: el("campoFormaPago")?.value || "",
     pago: el("campoPago")?.value || "",
     boleta: el("campoBoleta")?.value || "",
