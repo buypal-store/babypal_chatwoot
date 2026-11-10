@@ -345,6 +345,18 @@
     const dir = $('campoDireccion'), dis = $('campoDistrito');
     if (dir) { dir.value = textoDireccion(a); dir.style.borderColor = 'rgba(34,197,94,.6)'; }
     if (dis) { dis.value = 'Agencia'; dis.style.borderColor = 'rgba(34,197,94,.6)'; }
+    // Shalom recoge los paquetes en el almacén (Luis, 10/11/2026): el transportista es Shalom y sale en la
+    // tarde. Se avisa del cambio para que el resto del formulario (aviso de horario/turno) se entere.
+    const rep = $('campoReparto'), tur = $('campoTurno');
+    if (rep) {
+      if (![...rep.options].some(o => o.value === 'Shalom')) rep.add(new Option('Shalom', 'Shalom'));
+      rep.value = 'Shalom'; rep.style.borderColor = 'rgba(34,197,94,.6)';
+      rep.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (tur) {
+      tur.value = 'T'; tur.style.borderColor = 'rgba(34,197,94,.6)';
+      tur.dispatchEvent(new Event('change', { bubbles: true }));
+    }
     escribiendoNosotros = false;
     pintarElegida();
   }
