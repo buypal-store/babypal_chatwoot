@@ -543,8 +543,34 @@ function renderTablaPedidoFinal() {
 // cancelar el aviso reescribia el campo al siguiente dia de reparto, asi que un sabado por la tarde todos
 // los pedidos acababan con fecha del lunes. Lo unico que queda es exigir que haya fecha: sin fecha el
 // pedido entra sin numero y falla.
+// 12/11/2026 (Wendy): desde la 1:16 pm (hora de Lima) el pedido va al SIGUIENTE dia de reparto (domingo no hay
+// reparto: sabado tarde -> lunes). Solo se mueve la fecha que puso el tomador solo (dataset.auto); si el asesor la
+// cambia a mano, se respeta (lo que fallo el 17/10 fue pisar la fecha elegida). Se recalcula al enviar, por si el
+// tomador quedo abierto desde la manana.
+function fechaRepartoLima() {
+  const p = {};
+  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  const d = new Date(Date.UTC(+p.year, +p.month - 1, +p.day));
+  if (+p.hour * 60 + +p.minute >= 13 * 60 + 16) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() + 1);
+  }
+  return d.toISOString().slice(0, 10);
+}
+function ponerFechaAuto(campo) {
+  if (!campo) return;
+  campo.value = fechaRepartoLima();
+  campo.dataset.auto = "1";
+  if (!campo.dataset.escucha) {
+    campo.dataset.escucha = "1";
+    campo.addEventListener("input", () => { delete campo.dataset.auto; });
+  }
+}
+
 function confirmarFechaPedido() {
   const campo = el("campoFecha");
+  if (campo && campo.dataset.auto === "1") campo.value = fechaRepartoLima();
   const fecha = String(campo?.value || "");
   if (!fecha) {
     alert('⚠️ Falta la FECHA del pedido. Sin fecha el pedido entra sin número y falla.');
@@ -1033,22 +1059,14 @@ function init() {
   // Fecha de hoy
   const fechaInput = document.getElementById('campoFecha');
   if (fechaInput) {
-    const hoy = new Date();
-    const fechaFormateada = hoy.getFullYear() + '-' +
-      String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
-      String(hoy.getDate()).padStart(2, '0');
-    fechaInput.value = fechaFormateada;
+    ponerFechaAuto(fechaInput);
   }
 }
 
 // Asignar fecha de hoy al campo (por si acaso)
 const fechaInput = document.getElementById('campoFecha');
 if (fechaInput) {
-  const hoy = new Date();
-  const fechaFormateada = hoy.getFullYear() + '-' +
-    String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
-    String(hoy.getDate()).padStart(2, '0');
-  fechaInput.value = fechaFormateada;
+  ponerFechaAuto(fechaInput);
 }
 
 // ---------- DESACTIVAR SUGERENCIAS DEL NAVEGADOR ----------
