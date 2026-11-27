@@ -9,6 +9,8 @@
 //   compartió su ubicación (campo Ubicación), ordena por cercanía.
 // · Tamaño: con las medidas de productos calcula el paquete del carrito (RPC shalom_admision) y
 //   marca las agencias que NO lo reciben (p. ej. las mini-micro solo aceptan hasta paquete M).
+// · 27/11/2026: lo escrito a mano ("SHALOM: Morrope") se cambia solo por la dirección oficial si es una sola agencia sin
+//   dudas, y un pedido Shalom ya no sube si la agencia no es del catálogo o no recibe el pedido (antes: "¿Subir igual?").
 // · Link para el cliente: erp.buypal.com.pe/agencia/<código> (RPC shalom_link_crear). Lo que el
 //   cliente elige se recoge por conversation_id (RPC shalom_link_eleccion) y se llena solo.
 //
@@ -337,8 +339,11 @@
     });
   }
   async function elegir(a, porCliente) {
-    if (!porCliente && estadoDe(a) === 'no' &&
-        !await Avisos.preguntar(`❌ ${a.nombre} no recibe este pedido.\n${recibeTxt(a)}.\n\nEn ventanilla lo rechazarían. ¿Elegirla igual?`)) return;
+    // 27/11/2026: ya no se puede elegir igual: en ventanilla la rechazan y el pedido no se podría subir.
+    if (!porCliente && estadoDe(a) === 'no') {
+      Avisos.mostrar(`❌ ${a.nombre} no recibe este pedido (${minus(recibeTxt(a))}).\nElige otra agencia de la lista.`);
+      return;
+    }
     elegida = a;
     elegidaPorCliente = !!porCliente;
     escribiendoNosotros = true;
@@ -451,6 +456,52 @@
     return (agencias || []).find(a => { const t = textoDireccion(a).toUpperCase(); return d === t || d.startsWith(t + ' '); }) || null;
   }
 
+  /**
+   * La agencia que escribió el asesor a mano ("SHALOM: Morrope", "shalom morope"), solo si es UNA y sin dudas:
+   * el nombre exacto, el nombre seguido de más texto, o el nombre con una letra de diferencia. Si el nombre está
+   * dentro del de otra agencia ("SANTA ROSA" ↔ "SULLANA SANTA ROSA") no se elige sola: se abre la lista para escoger.
+   * Así no se repite lo de Pedro (Santa Rosa de Lima en vez de Sullana) ni lo de Fidel (escrito a mano, 24/11/2026).
+   */
+  function agenciaEscrita(texto) {
+    if (!agencias) return null;
+    const t = norm(String(texto || '').replace(/^\s*shalo[mn]\s*:?\s*/i, ''));
+    if (t.length < 3) return null;
+    const tc = t.replace(/ /g, '');
+    const exactas = [], casiIguales = [];
+    for (const a of agencias) {
+      if (!a._nombre) continue;
+      if (t === a._nombre || t.startsWith(a._nombre + ' ') || tc === a._compacto) exactas.push(a);
+      else if (a._nombre.length >= 5 && casi(t, a._nombre)) casiIguales.push(a);
+    }
+    // El nombre más largo que coincide gana ("TINGO MARIA LEONCIO PRADO" antes que "TINGO MARIA")
+    exactas.sort((x, y) => y._nombre.length - x._nombre.length);
+    const elegidaTxt = exactas.length ? exactas[0] : (casiIguales.length === 1 ? casiIguales[0] : null);
+    if (!elegidaTxt) return null;
+    if (!exactas.length && casiIguales.length !== 1) return null;
+    const n = elegidaTxt._nombre;
+    // Otras agencias con ese mismo nombre, o que lo llevan dentro ("SANTA ROSA" ↔ "SULLANA SANTA ROSA")
+    const rivales = agencias.filter(o => o !== elegidaTxt && (o._nombre === n || (' ' + o._nombre + ' ').includes(' ' + n + ' ')));
+    if (!rivales.length) return elegidaTxt;
+    // Con dudas solo decide la dirección que se escribió después del nombre ("ABANCAY - AV. PANAMERICANA S/N ...")
+    const resto = tokens(t.startsWith(n) ? t.slice(n.length) : '');
+    if (resto.length < 2) return null;
+    const cubre = a => { const ts = new Set(tokens([a.direccion, a.lugar].join(' '))); return resto.filter(q => ts.has(q)).length / resto.length; };
+    const puntajes = [elegidaTxt, ...rivales].map(a => ({ a, p: cubre(a) })).sort((x, y) => y.p - x.p);
+    return puntajes[0].p >= 0.6 && puntajes[0].p - (puntajes[1] ? puntajes[1].p : 0) >= 0.25 ? puntajes[0].a : null;
+  }
+  /** Si lo escrito es una agencia sin dudas y recibe el pedido, pone su dirección oficial. Devuelve la agencia o null. */
+  async function enlazarEscrita() {
+    const dir = $('campoDireccion');
+    if (!dir || elegida || !/shalo[mn]/i.test(dir.value)) return null;
+    if (coincideOficial(dir.value)) return null;
+    await Promise.all([cargar(), revisarTamano()]);
+    const a = agenciaEscrita(dir.value);
+    if (!a || estadoDe(a) === 'no') return null;
+    const p = panel(); if (p) { p.hidden = false; pintarPaquete(); }
+    await elegir(a);
+    return a;
+  }
+
   function abrir(desdeCliente) {
     const p = panel();
     if (!p) return;
@@ -458,7 +509,9 @@
     Promise.all([cargar(), revisarTamano()]).then(() => {
       pintarPaquete();
       const ya = coincideOficial(($('campoDireccion') || {}).value);
+      const escrita = !ya && desdeCliente ? agenciaEscrita(($('campoDireccion') || {}).value) : null;
       if (ya) { elegida = ya; pintarElegida(); }
+      else if (escrita && estadoDe(escrita) !== 'no') { elegir(escrita); }
       else {
         pintarElegida();
         const q = $('shalomBuscar');
@@ -478,19 +531,50 @@
     cargar().then(() => revisarEleccion());
   }
 
-  /** Antes de subir: avisa si es Shalom y la agencia no salió de la lista, o si no recibe el pedido. */
-  function confirmarEnvio() {
-    const dir = String(($('campoDireccion') || {}).value || '');
-    if (!/shalo[mn]/i.test(dir) || !agencias) return true;
-    const a = coincideOficial(dir);
-    if (!a) {
-      return Avisos.preguntar('⚠️ La agencia Shalom no se eligió de la lista.\n\nLa guía de remisión necesita la dirección oficial de la agencia ' +
-        '(usa el buscador 🚚 sobre los campos).\n\n¿Subir el pedido igual?');
+  /**
+   * Antes de subir (27/11/2026): un pedido Shalom solo sube con una agencia del catálogo que reciba el pedido.
+   * Así el ticket masivo sale sin filas rechazadas. Antes solo preguntaba "¿Subir igual?" y se aceptaba.
+   * · Escrita a mano y sin dudas ("SHALOM: Morrope") → se pone la dirección oficial y se pide revisar y volver a subir.
+   * · No reconocida o que no recibe el pedido → no sube y se abre la lista para elegir.
+   * · Si la lista de agencias no carga (sin internet, Supabase caído) se pregunta como antes, para no frenar la venta.
+   */
+  async function confirmarEnvio() {
+    const campo = $('campoDireccion');
+    const dir = String((campo || {}).value || '');
+    if (!/shalo[mn]/i.test(dir)) return true;
+    try {
+      await Promise.all([cargar(), revisarTamano()]);
+      if (!agencias) {
+        return Avisos.preguntar('⚠️ No se pudo cargar la lista de agencias Shalom para revisar la dirección.\n\n¿Subir el pedido igual?');
+      }
+      let a = coincideOficial(dir);
+      if (!a) {
+        const escrita = await enlazarEscrita();
+        if (escrita) {
+          Avisos.mostrar(`⚠️ Se puso la dirección oficial de la agencia ${escrita.nombre}.\nRevísala y vuelve a pulsar Subir.`);
+          return false;
+        }
+        cerradoPorUsuario = false;
+        abrir(true);
+        const noRecibe = agenciaEscrita(dir);
+        if (noRecibe && estadoDe(noRecibe) === 'no') {
+          Avisos.mostrar(`🔒 No se puede subir: ${noRecibe.nombre} no recibe este pedido (${minus(recibeTxt(noRecibe))}).\nElige en la lista una agencia que sí lo reciba.`);
+          return false;
+        }
+        Avisos.mostrar('🔒 No se puede subir: la agencia Shalom no se reconoce.\nElígela en la lista 🚚 de arriba (o pide al cliente que la elija con el link).');
+        return false;
+      }
+      if (estadoDe(a) === 'no') {
+        cerradoPorUsuario = false;
+        elegida = null; abrir(false);
+        Avisos.mostrar(`🔒 No se puede subir: ${a.nombre} no recibe este pedido (${minus(recibeTxt(a))}).\nElige en la lista una agencia que sí lo reciba.`);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn('Revisión Shalom falló:', e && e.message);
+      return Avisos.preguntar('⚠️ No se pudo revisar la agencia Shalom.\n\n¿Subir el pedido igual?');
     }
-    if (estadoDe(a) === 'no') {
-      return Avisos.preguntar(`❌ ${a.nombre} no recibe este pedido (${minus(recibeTxt(a))}).\nEn ventanilla lo rechazarían.\n\n¿Subir el pedido igual?`);
-    }
-    return true;
   }
 
   function iniciar() {
@@ -511,6 +595,8 @@
       if (!elegida && !cerradoPorUsuario && pareceShalom() && $('shalomPanel') && $('shalomPanel').hidden) abrir(true);
     };
     dir.addEventListener('input', alEscribir);
+    // Al salir de Dirección: "SHALOM: Morrope" escrito a mano → dirección oficial (si no hay dudas)
+    dir.addEventListener('change', () => { if (!escribiendoNosotros) enlazarEscrita().catch(() => null); });
     if (dis) dis.addEventListener('input', alEscribir);
     // Si cambia el carrito con el panel abierto, se recalcula el tamaño al volver a mirarlo
     document.addEventListener('click', e => {
@@ -525,6 +611,7 @@
     cargar();   // en segundo plano: cuando se abra el resumen ya está lista
   }
 
-  window.ShalomAgencias = { revisar, confirmarEnvio, buscar: t => cargar().then(() => buscar(t)), revisarTamano };
+  window.ShalomAgencias = { revisar, confirmarEnvio, buscar: t => cargar().then(() => buscar(t)), revisarTamano,
+    agenciaEscrita: t => cargar().then(() => agenciaEscrita(t)) };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })();
